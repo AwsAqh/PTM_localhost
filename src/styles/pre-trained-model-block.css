@@ -1,0 +1,33 @@
+.block-container{
+height: 15%;
+display: flex;
+width: 30%;
+gap: 2%;
+background-color: rgba(240, 248, 255, 0.121);
+color: aliceblue;
+border: 1px solid white;
+}
+.model-img{
+
+    height:100%;
+    width: 50%;
+}
+
+.model-img>img{
+
+   
+    width: 80%;
+    height: 100%;
+}   
+
+.model-info{
+    font-size: 90%;
+    width: 50%;
+    padding-right: 5%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+
+}
+
+

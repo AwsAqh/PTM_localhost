@@ -1,0 +1,43 @@
+import React, { useState,useEffect } from 'react'
+import Header from '../components/header'
+import "../styles/BrowsePreTrainedModels.css"
+import PreTrainedModelBlock from '../components/pre-trained-model-block'
+const BrowsePreTrainedModels = () => {
+
+       const [models,setModels] =useState([]);
+        console.log(" type of models : ",models)
+
+    useEffect(()=>{
+        const handleOnMount=async()=>{
+        try{
+        const response=await fetch("http://localhost:5000/api/classify/models",{
+            method:"GET",
+            headers:{ "Content-type":"application/json" }
+        })
+        if(!response.ok){
+                console.log("error retreiving data ")
+        }
+            const data=await response.json()
+            setModels(data)
+
+        }catch{
+                    console.log("can't fetch models!")
+        }}
+        handleOnMount()
+        },[])
+       
+
+  return (
+    <div className='models-page-container'>
+      <Header/>
+        <div className='models-container'>
+
+        {models.map((model,index)=> <PreTrainedModelBlock key={index} modelName={model.name}  />)}
+                
+                
+        </div>
+    </div>
+  )
+}
+
+export default BrowsePreTrainedModels

@@ -1,0 +1,24 @@
+
+
+.models-page-container{
+
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    
+    align-items: center;
+}
+
+.models-container{
+    padding-top: 2%;
+height: 100vh;
+width: 50%;
+display: flex;
+flex-wrap: wrap;
+justify-content: center;
+
+justify-content: space-around;
+gap: 2%;
+
+}

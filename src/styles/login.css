@@ -1,0 +1,121 @@
+.auth-page{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    height: 100vh;
+    width: 100%;
+
+}
+.banner{background-color: rgb(74, 107, 207); height: 80%; width: 40%; border-radius: 10px;  z-index: 1; display: flex;  flex-direction: column; justify-content: space-around; align-items: center;}
+
+.banner>img{
+    height:300px ; width: 300px;
+}
+.auth-area{border-radius: 10px; background-color: rgb(246, 243, 243); height: 80%; width: 30%; display: flex; flex-direction: column; justify-content: space-around;  align-items: center;}
+
+.auth-header{display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px;}
+.auth-header>img{height: 20px; width: 20px;}
+
+.auth-form{display: flex;
+    width: 80%;
+    gap: 10px;
+    flex-direction: column;
+
+}
+
+form>button{width: 100%;}
+.login-options{
+    display: flex;
+    gap: 20px;
+
+}
+
+.login-options>div{border: 2px solid black; padding: 5px;}
+
+.options-span {
+    width: 80%;
+   
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    margin: 20px 0;
+  }
+  
+  .line {
+    flex-grow: 1;
+    height: 1px;
+    background-color: #ccc;
+  }
+  
+  .text {
+    margin: 0 10px;
+    color: #888;
+    font-size: 14px;
+    font-weight: 400;
+  }
+  
+
+
+
+  
+
+  .login-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin: 20px 0;
+  }
+  
+  .line {
+    flex-grow: 1;
+    height: 1px;
+    background-color: #ccc;
+  }
+  
+  .text {
+    margin: 0 10px;
+    color: #888;
+    font-size: 14px;
+    font-weight: 400;
+  }
+  
+  .social-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+  }
+  
+  .social-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: 600;
+    
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+  }
+  
+  .social-button.google {
+    background-color: white;
+    color: #db4437; /* Google color */
+  }
+  
+  .social-button.facebook {
+    background-color: white;
+    color: #3b5998; /* Facebook color */
+  }
+  
+  .social-button i {
+    margin-right: 8px;
+  }
+  
+  .social-button:hover {
+    opacity: 0.8;
+  }
+  

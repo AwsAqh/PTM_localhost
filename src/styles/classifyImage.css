@@ -1,0 +1,90 @@
+.classify-page-container{
+
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+   
+}
+
+
+.model-information{
+    background-color: antiquewhite;
+    height: 20%;
+    width: 70%;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 10%;
+
+}
+
+.classes-list{
+
+    display: flex;
+    gap: 2%;
+    width: 100%;
+    
+    justify-content: center;
+}
+.class-box {
+    background-color: #FDFAF6;
+    border: 3px solid white;
+    width: 10%;
+    color: rgb(117, 115, 115);
+    text-align: center;
+
+    box-shadow:
+    inset 0 -3em 3em #FDFAF6,
+    0 0 0 2px white,
+    0.3em 0.3em 1em rgba(137, 137, 137, 0.6);
+    border-radius: 5px;
+}
+
+
+.classify-block{
+
+    background-color: rgb(206, 206, 206);
+    height: 90%;
+    width: 90%;
+    border: 5px dashed whitesmoke;
+    
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2%;
+
+}
+
+
+.classify-block>img{
+
+    width: 10%;
+    height: 30%;
+}
+
+
+.label {
+    display: inline-block;
+    
+    cursor: pointer;
+    padding: 6px 12px;
+    background-color: #007bff;  /* Button color (default primary button color) */
+    color: white;  /* Text color */
+    border-radius: 4px;  /* Matching border radius of Bootstrap buttons */
+    text-align: center;
+    font-size: 14px;
+}
+
+
+.label:hover {
+    background-color: #0056b3;  /* Darker blue on hover */
+    text-decoration: none;  /* Prevent underlining */
+}
+
+
+
