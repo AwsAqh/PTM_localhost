@@ -6,20 +6,7 @@ const ClassBlock = ({ onDelete, id, elref,fileState,setter,onFileChange }) => {
     const [fileName, setFileName] = useState("upload")
     
 
-    const handleFileChange = (e) => {
-      const file = e.target.files[0];
-      
-      
-      if (file) 
-        setFileName(file.name); 
-       else 
-        setFileName('Upload'); 
-      
-
-      [...e.target.files].map(file => setter(prev => [...prev, file]));
- 
-    
-    };
+  
   
     return (
       <div className='class-block'>

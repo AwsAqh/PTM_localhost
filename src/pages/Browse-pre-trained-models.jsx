@@ -32,7 +32,7 @@ const BrowsePreTrainedModels = () => {
       <Header/>
         <div className='models-container'>
 
-        {models.map((model,index)=> <PreTrainedModelBlock key={index} modelName={model.name}  />)}
+        {models.map((model,index)=> <PreTrainedModelBlock key={index} modelName={model.name} id={model._id}  />)}
                 
                 
         </div>

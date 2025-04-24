@@ -3,6 +3,19 @@ import Header from '../components/header'
 import "../styles/classifyImage.css"
 import Upload from "../assets/upload-image-for-classification.png"
 const ClassifyImage = () => {
+
+
+    const handleClassifyImage=()=>{
+
+
+
+    }
+    const handleFileChange=(file)=>{
+      console.log("file : ", file)
+
+    }
+
+
   return (
     <div className='classify-page-container'>
     <Header/>
@@ -27,6 +40,7 @@ const ClassifyImage = () => {
             <input
             className='img-input'
              type='file' 
+             onChange={(e)=>handleFileChange(e.target.files)}
             style={{display:"none"}}
             id="input-image"
             />

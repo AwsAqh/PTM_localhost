@@ -20,7 +20,7 @@ function App() {
           <Route path='/home' element={<HomePage/>} />
           <Route path='/new' element={<TrainNewModel/>}/>
           <Route path="/browse" element={<BrowsePreTrainedModels/>}/>
-          <Route path="/classify" element={<ClassifyImage/>}/>
+          <Route path="/classify/:id" element={<ClassifyImage/>}/>
       </Routes>
    </Router>
   )
