@@ -1,5 +1,5 @@
 const express = require('express');
-const { upload, handleFileUpload ,getModels} = require('../controllers/modelsController');
+const { upload, handleFileUpload ,getModels,classifyImage} = require('../controllers/modelsController');
 const jwt = require("jsonwebtoken");
 const router = express.Router();
 
@@ -51,4 +51,5 @@ router.post('/upload', upload.any(), (req, res, next) => {
 
 router.get("/models",getModels)
 
+router.post("/classify",upload.single("file"), classifyImage)
 module.exports = router;

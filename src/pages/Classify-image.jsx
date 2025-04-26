@@ -2,14 +2,35 @@ import React from 'react'
 import Header from '../components/header'
 import "../styles/classifyImage.css"
 import Upload from "../assets/upload-image-for-classification.png"
+import { useParams } from 'react-router-dom'
 const ClassifyImage = () => {
 
-
-    const handleClassifyImage=()=>{
-
-
+  const {id}=useParams()
+  console.log("model id : " , id)  
+    const handleClassifyImage=async(file)=>{
+      console.log("inside handleClassifyImage ")
+      
+      try{
+          const formData=new FormData()
+          formData.append("file",file)
+          formData.append("modelId",id)
+          
+            const response =await fetch("http://localhost:5000/api/classify/classify",{
+              method:"POST",
+             
+              body:formData
+            })
+          if(!response.ok) console.log("error uploading file")
+            const data=await response.json()
+            console.log("image classified : ")
+      }
+      catch{
+        console.log("error classifyng image ")
+      }
 
     }
+
+
     const handleFileChange=(file)=>{
       console.log("file : ", file)
 
@@ -38,9 +59,10 @@ const ClassifyImage = () => {
             Capture an image !
            
             <input
+            name='file'
             className='img-input'
              type='file' 
-             onChange={(e)=>handleFileChange(e.target.files)}
+             onChange={(e)=>handleClassifyImage(e.target.files[0])}
             style={{display:"none"}}
             id="input-image"
             />

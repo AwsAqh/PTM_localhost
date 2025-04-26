@@ -75,6 +75,7 @@ const handleFileUpload = async (req, res) => {
       console.log(" id id :" , req.userId)
       const newModel = new Model({
           name: req.body.modelName,
+          modelNameOnCloud:modelNameWithUniqueId,
           path: "/pytorch/models/" + modelPath,
           classes:classNames,
           createdBy: req.userId
@@ -114,8 +115,56 @@ const getModels=async(req,res)=>{
 
 }
 
+const classifyImage=async(req,res)=>{
+
+  const file=req.file
+  console.log("inside classify image , file is : ", file)
+  console.log(" model id : ", req.body.modelId)
+  var cloudModelName=""
+
+      try{
+            const model=await Model.findById(req.body.modelId,"modelNameOnCloud path")
+            cloudModelName=model.modelNameOnCloud
+      }
+      
+      
+      catch(err){
+        console.log("error getting model from database  ",err)
+        res.status(500)
+      }
+
+    try{
+
+          //create a folder with the same name of the model +'classify'
+          //save the input image
+          //get the url for it, pass the url to python server
+
+          cloudinary.uploader.upload_stream({
+            folder:`classify/${cloudModelName}`, 
+            public_id: `${Date.now()}_${file.originalname.replace(/\s+/g, '_')}`,
+          }, (err, result) => {
+            if (err) {
+              return res.status(500).json({ message: 'Error uploading to Cloudinary', error: err });
+            } else {
+              console.log('File uploaded to Cloudinary:', result.secure_url);
+            }
+          }).end(file.buffer);
+        res.status(200)
+        }
+          
+
+    
+    
+    catch{
+          console.log("error saving input image ")
+          res.status(500)
+    }
+
+}
+
 module.exports = {
   upload,
   handleFileUpload,
-  getModels
+  getModels,
+  classifyImage
 };
