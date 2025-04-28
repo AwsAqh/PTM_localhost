@@ -124,10 +124,11 @@ const classifyImage = async (req, res) => {
   let modelPath = "";
   let imageUrl = "";
   let classesLength=0
+  let model=null
 
   try {
     
-    const model = await Model.findById(req.body.modelId, "modelNameOnCloud path classes");
+     model = await Model.findById(req.body.modelId, "modelNameOnCloud path classes");
     cloudModelName = model.modelNameOnCloud;
     modelPath = model.path;
     classesLength=model.classes.length
@@ -163,9 +164,9 @@ const classifyImage = async (req, res) => {
         .then(response => {
           const result = response.data.predicted_class;
           console.log("Classification result:", result);
-
           
-          res.status(200).json({ result });
+          
+          res.status(200).json({ result:model.classes[result] });
         })
         .catch(err => {
           console.log("Error classifying image!", err);
