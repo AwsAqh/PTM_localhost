@@ -115,52 +115,72 @@ const getModels=async(req,res)=>{
 
 }
 
-const classifyImage=async(req,res)=>{
+const classifyImage = async (req, res) => {
+  const file = req.file;
+  console.log("Inside classify image, file is:", file);
+  console.log("Model ID:", req.body.modelId);
 
-  const file=req.file
-  console.log("inside classify image , file is : ", file)
-  console.log(" model id : ", req.body.modelId)
-  var cloudModelName=""
+  let cloudModelName = "";
+  let modelPath = "";
+  let imageUrl = "";
+  let classesLength=0
 
-      try{
-            const model=await Model.findById(req.body.modelId,"modelNameOnCloud path")
-            cloudModelName=model.modelNameOnCloud
+  try {
+    
+    const model = await Model.findById(req.body.modelId, "modelNameOnCloud path classes");
+    cloudModelName = model.modelNameOnCloud;
+    modelPath = model.path;
+    classesLength=model.classes.length
+    console.log("classes length in node.js : ",classesLength)
+
+  } catch (err) {
+    console.log("Error getting model from database", err);
+    return res.status(500).json({ msg: "Error getting model from database", error: err.message });
+  }
+
+
+
+  try {
+    
+    const uploadStream = cloudinary.uploader.upload_stream({
+      folder: `classify/${cloudModelName}`,
+      public_id: `${Date.now()}_${file.originalname.replace(/\s+/g, '_')}`,
+    }, (err, result) => {
+      if (err) {
+        console.log("Error uploading to Cloudinary", err);
+        return res.status(500).json({ message: 'Error uploading to Cloudinary', error: err });
       }
+
+      console.log('File uploaded to Cloudinary:', result.secure_url);
+      imageUrl = result.secure_url;  
+
       
-      
-      catch(err){
-        console.log("error getting model from database  ",err)
-        res.status(500)
-      }
+      axios.post("http://127.0.0.1:5000/classify", {
+        image_url: imageUrl,
+        model_path: modelPath,
+        classes_length:classesLength
+      })
+        .then(response => {
+          const result = response.data.predicted_class;
+          console.log("Classification result:", result);
 
-    try{
-
-          //create a folder with the same name of the model +'classify'
-          //save the input image
-          //get the url for it, pass the url to python server
-
-          cloudinary.uploader.upload_stream({
-            folder:`classify/${cloudModelName}`, 
-            public_id: `${Date.now()}_${file.originalname.replace(/\s+/g, '_')}`,
-          }, (err, result) => {
-            if (err) {
-              return res.status(500).json({ message: 'Error uploading to Cloudinary', error: err });
-            } else {
-              console.log('File uploaded to Cloudinary:', result.secure_url);
-            }
-          }).end(file.buffer);
-        res.status(200)
-        }
           
+          res.status(200).json({ result });
+        })
+        .catch(err => {
+          console.log("Error classifying image!", err);
+          res.status(500).json({ msg: "Error classifying image.", error: err.message });
+        });
+    });
 
-    
-    
-    catch{
-          console.log("error saving input image ")
-          res.status(500)
-    }
+    uploadStream.end(file.buffer);
 
-}
+  } catch (err) {
+    console.log("Error saving input image", err);
+    res.status(500).json({ msg: "Error saving input image.", error: err.message });
+  }
+};
+
 
 module.exports = {
   upload,

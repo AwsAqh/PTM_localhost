@@ -14,7 +14,7 @@ const ClassifyImage = () => {
           const formData=new FormData()
           formData.append("file",file)
           formData.append("modelId",id)
-          
+
             const response =await fetch("http://localhost:5000/api/classify/classify",{
               method:"POST",
              
@@ -22,7 +22,7 @@ const ClassifyImage = () => {
             })
           if(!response.ok) console.log("error uploading file")
             const data=await response.json()
-            console.log("image classified : ")
+            console.log("image classified : ",data.result)
       }
       catch{
         console.log("error classifyng image ")

@@ -80,7 +80,7 @@ def setup_model(num_classes):
     return model.to(device)
 
 
-def train_model(model, dataloaders, criterion, optimizer, num_epochs=6):
+def train_model(model, dataloaders, criterion, optimizer, num_epochs=12):
     best_model_wts = model.state_dict()
     best_acc = 0.0
 
@@ -173,7 +173,7 @@ if __name__ == '__main__':
     optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
     
-    trained_model = train_model(model, train_loader, criterion, optimizer, num_epochs=5)
+    trained_model = train_model(model, train_loader, criterion, optimizer, num_epochs=12)
 
     
     local_model_path = save_model_locally(trained_model, file_name)
