@@ -38,7 +38,7 @@ def get_image_urls_from_cloudinary(model_name, class_names):
     image_urls = {}
     for class_name in class_names:
         
-        result = cloudinary.api.resources(type='upload', prefix=f"{model_name}/{class_name}", max_results=100)
+        result = cloudinary.api.resources(type='upload', prefix=f"dataset/{model_name}/{class_name}", max_results=100)
         image_urls[class_name] = [resource['secure_url'] for resource in result['resources']]
     return image_urls
 

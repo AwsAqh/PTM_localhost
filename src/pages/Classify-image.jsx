@@ -1,12 +1,52 @@
-import React from 'react'
+import {React,useEffect, useState} from 'react'
+import { useNavigate } from 'react-router-dom'
 import Header from '../components/header'
 import "../styles/classifyImage.css"
 import Upload from "../assets/upload-image-for-classification.png"
 import { useParams } from 'react-router-dom'
 const ClassifyImage = () => {
-
+  const [classes,setClassses]=useState([])
+  const [modelName,setModelName]=useState('')
+  
   const {id}=useParams()
-  console.log("model id : " , id)  
+
+  const navigate=useNavigate()
+  //secure page
+  useEffect((  )=>{
+    const token=localStorage.getItem("token")
+    console.log(token)
+    if(!token) navigate("/login")
+      
+
+  },[navigate])
+
+  //load classes on mount
+  useEffect(()=>{
+      const getModelClasses=async()=>{
+         try{
+      const response=await fetch(`http://localhost:5000/api/classify/classes/${id}`,
+        {method:'GET',
+        headers:{'Content-type':'application/json'}})
+
+        if(!response.ok) console.log("something went wrong! ")
+          else{
+            const data=await response.json()
+            setClassses(data.classes)
+            setModelName(data.modelName)
+            
+          }
+
+    }
+      catch(err){
+        console.log(" error getting classes :" ,err)
+
+      }
+      
+    }
+    getModelClasses()
+  },[])
+
+  //send a req for classification
     const handleClassifyImage=async(file)=>{
       console.log("inside handleClassifyImage ")
       
@@ -31,24 +71,17 @@ const ClassifyImage = () => {
     }
 
 
-    const handleFileChange=(file)=>{
-      console.log("file : ", file)
-
-    }
-
-
   return (
     <div className='classify-page-container'>
     <Header/>
     <div  style={{display: "flex", flexDirection:"column", height:"100%", width:"100%", alignItems:"center",justifyContent:"center",gap:"3%"  }} >
 
      <div className='model-information' >
-        Model Name
+        {modelName}
 
         <div className='classes-list'>
-            <div className='class-box'> class 1 </div>
-            <div className='class-box'> class 2 </div>
-            <div className='class-box'> class 3 </div>
+        {classes.map((classItem,index)=><div key={index} className='class-box'>{classItem}</div>)}
+            
         </div>
      </div>
 

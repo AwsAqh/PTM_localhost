@@ -1,4 +1,5 @@
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState,useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import "../styles/train-new-modle.css"
 import Button from '../components/Button'
 import ClassBlock from '../components/class-block'
@@ -6,6 +7,16 @@ import Header from '../components/header'
 import axios from 'axios';
 
 const TrainNewModel = () => {
+
+  const navigate=useNavigate()
+
+  useEffect((  )=>{
+    const token=localStorage.getItem("token")
+    console.log(token)
+    if(!token) navigate("/login")
+      
+
+  },[navigate])
 
         const [classes,setClasses]=useState([{id:1, name:"class 1"} , {id:2, name:"class 2"} ])
         const modelName=useRef()

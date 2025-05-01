@@ -1,8 +1,18 @@
 import React, { useState,useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Header from '../components/header'
 import "../styles/BrowsePreTrainedModels.css"
 import PreTrainedModelBlock from '../components/pre-trained-model-block'
 const BrowsePreTrainedModels = () => {
+
+  const navigate=useNavigate()
+  useEffect((  )=>{
+    const token=localStorage.getItem("token")
+    console.log(token)
+    if(!token) navigate("/login")
+      
+
+  },[navigate])
 
        const [models,setModels] =useState([]);
         console.log(" type of models : ",models)

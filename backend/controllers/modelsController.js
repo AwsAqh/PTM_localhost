@@ -3,7 +3,7 @@ const cloudinary = require('../cloudinaryConfig');
 const axios = require('axios');
 const uuid = require('uuid'); 
 const Model=require("../models/models");
-const { models } = require('mongoose');
+
 
 const storage = multer.memoryStorage();
 
@@ -37,7 +37,7 @@ const handleFileUpload = async (req, res) => {
     if (classFiles && classFiles.length > 0) {
       classFiles.forEach((file) => {
         // Create a unique folder for each model using model name + unique model ID
-        const modelFolder = `${modelNameWithUniqueId}/${className}`;
+        const modelFolder = `dataset/${modelNameWithUniqueId}/${className}`;
         
       
         cloudinary.uploader.upload_stream({
@@ -76,7 +76,7 @@ const handleFileUpload = async (req, res) => {
       const newModel = new Model({
           name: req.body.modelName,
           modelNameOnCloud:modelNameWithUniqueId,
-          path: "/pytorch/models/" + modelPath,
+          path: "./models/" + modelPath,
           classes:classNames,
           createdBy: req.userId
       });
@@ -169,8 +169,13 @@ const classifyImage = async (req, res) => {
           res.status(200).json({ result:model.classes[result] });
         })
         .catch(err => {
-          console.log("Error classifying image!", err);
-          res.status(500).json({ msg: "Error classifying image.", error: err.message });
+          if (err.response) {
+            console.error("status:", err.response.status);
+            console.error("body:", err.response.data);
+          } else {
+            console.error(err);
+          }
+          res.status(500).json({ msg: "Error classifying image.", error: err.response?.data });
         });
     });
 
@@ -182,10 +187,25 @@ const classifyImage = async (req, res) => {
   }
 };
 
+const getModelClasses=async(req,res)=>{
+const {id}=req.params
+
+  try{
+    const model=await Model.findById(id ,"classes name")
+    console.log("mode classes : ",model.classes)
+    res.status(200).json({classes:model.classes,modelName:model.name})
+  }
+  catch(err){
+    console.log("error retrieving classes from database : ",err)
+    res.status(500).json({msg:"error happend while retrieving classes from database"})
+  }
+}
+
 
 module.exports = {
   upload,
   handleFileUpload,
   getModels,
-  classifyImage
+  classifyImage,
+  getModelClasses
 };
