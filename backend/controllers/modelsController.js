@@ -10,14 +10,15 @@ const storage = multer.memoryStorage();
 
 const upload = multer({ storage });
 
-const handleFileUpload = async (req, res) => {
+const handleTrainNewModel = async (req, res) => {
   if (!req.files || req.files.length === 0) {
     return res.status(400).json({ message: 'No files uploaded.' });
   }
 
   const classesCount = parseInt(req.body.classesCount, 10);
   let classNames = [];
-
+  const modelArch=req.body.modelArch
+  const modelCategory=req.body.category
   const uniqueModelId =  uuid.v4().slice(0, 8);  
 
   
@@ -64,6 +65,8 @@ const handleFileUpload = async (req, res) => {
     const response = await axios.post('http://127.0.0.1:5000/train', {
       modelName: modelNameWithUniqueId,  
       classes: classNames,
+      modelArch,
+      
       
     });
     const modelPath = response.data.modelPath;  
@@ -78,6 +81,8 @@ const handleFileUpload = async (req, res) => {
           modelNameOnCloud:modelNameWithUniqueId,
           path: "./models/" + modelPath,
           classes:classNames,
+          modelArcheticture:modelArch,
+          modelCategory:modelCategory,
           createdBy: req.userId
       });
       await newModel.save();
@@ -125,13 +130,15 @@ const classifyImage = async (req, res) => {
   let imageUrl = "";
   let classesLength=0
   let model=null
+  let modelArch=""
 
   try {
     
-     model = await Model.findById(req.body.modelId, "modelNameOnCloud path classes");
+     model = await Model.findById(req.body.modelId, "modelNameOnCloud path classes modelArcheticture");
     cloudModelName = model.modelNameOnCloud;
     modelPath = model.path;
     classesLength=model.classes.length
+    modelArch=model.modelArcheticture
     console.log("classes length in node.js : ",classesLength)
 
   } catch (err) {
@@ -155,11 +162,12 @@ const classifyImage = async (req, res) => {
       console.log('File uploaded to Cloudinary:', result.secure_url);
       imageUrl = result.secure_url;  
 
-      
+      console.log(" the sent arch for python is :",modelArch)
       axios.post("http://127.0.0.1:5000/classify", {
         image_url: imageUrl,
         model_path: modelPath,
-        classes_length:classesLength
+        classes_length:classesLength,
+        model_arch:modelArch
       })
         .then(response => {
           const result = response.data.predicted_class;
@@ -204,7 +212,7 @@ const {id}=req.params
 
 module.exports = {
   upload,
-  handleFileUpload,
+  handleTrainNewModel,
   getModels,
   classifyImage,
   getModelClasses

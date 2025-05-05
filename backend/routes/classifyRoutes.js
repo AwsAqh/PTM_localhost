@@ -1,5 +1,5 @@
 const express = require('express');
-const { upload, handleFileUpload ,getModels,classifyImage,getModelClasses} = require('../controllers/modelsController');
+const { upload, handleTrainNewModel ,getModels,classifyImage,getModelClasses} = require('../controllers/modelsController');
 const jwt = require("jsonwebtoken");
 const router = express.Router();
 
@@ -47,7 +47,7 @@ router.post('/upload', upload.any(), (req, res, next) => {
         console.log("Error verifying token:", err);
         return res.status(401).json({ msg: "Failed to verify token" });
     }
-}, handleFileUpload); 
+}, handleTrainNewModel); 
 
 router.get("/models",getModels)
 

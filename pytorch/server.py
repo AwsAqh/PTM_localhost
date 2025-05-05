@@ -11,6 +11,7 @@ app = Flask(__name__)
 def train_model():
     model_name = request.json.get('modelName')  
     classes = request.json.get('classes')  
+    model_arch=request.json.get("modelArch")
 
     if not model_name:
         return jsonify({'error': 'Model name is required'}), 400
@@ -22,7 +23,7 @@ def train_model():
         file_name = f"{model_name}.pth" 
 
         
-        subprocess.run(['python3', 'train_model.py', model_name, str(classes), file_name], check=True)
+        subprocess.run(['python3', 'train_model.py', model_name, str(classes),model_arch, file_name], check=True)
 
         
         return jsonify({'modelPath': file_name}), 200
@@ -33,33 +34,34 @@ def train_model():
 
 @app.route('/classify', methods=['POST'])
 def classify():
-    # Get the input data (image_url and model_path) from the request
+    
     data = request.get_json()
     image_url = data.get('image_url')
     model_path = data.get('model_path')
     classes_length = data.get('classes_length')
-
+    model_arch=data.get('model_arch')
+    print(f'data recieved : {image_url} {model_arch} {model_path} {classes_length}')
     if not image_url or not model_path or not classes_length:
         return jsonify({"error": "image_url, model_path, and classes_length are required"}), 400
 
     try:
-        # Run the classification script using subprocess and capture its output
+       
         result = subprocess.run(
-            ['python3', './classify_image.py', image_url, model_path, str(classes_length)],
+            ['python3', './classify_image.py', image_url, model_path,model_arch, str(classes_length)],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
         )
 
-        # If there was an error in the subprocess, capture the error and return it
+       
         if result.returncode != 0:
             return jsonify({'error': f"Error classifying image: {result.stderr}"}), 500
 
-        # Get the predicted class index from the stdout of the subprocess
-        predicted_class = result.stdout.strip()  # Strip any surrounding whitespace
+ 
+        predicted_class = result.stdout.strip() 
 
         return jsonify({"predicted_class": predicted_class}), 200
 
     except Exception as e:
-        # Handle errors
+       
         return jsonify({'error': str(e)}), 500
 
 

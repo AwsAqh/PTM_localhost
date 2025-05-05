@@ -19,9 +19,24 @@
 .newModel-container>div{ 
     width: 70%; justify-content: center; align-items: center ; }
 
-.head{ display: flex; align-items: center;}
+.head{ display: flex; align-items: center; flex-direction: column; gap: 4vh; }
 .head>input{
     width: 45%;}
+
+.arch-ctg-info{
+    width: 45%;
+   
+    gap: 2%;
+     display:  flex;
+    align-items: center;
+    justify-content: space-between;
+
+}
+.arch-ctg-info>select{
+    width: 50%;
+    border-radius: 10px;
+
+}
 
 
 .classes-list{

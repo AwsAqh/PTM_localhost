@@ -7,6 +7,8 @@ const  modelSchema=new mongoose.Schema({
     modelNameOnCloud:{type:String ,require:true },
     path:{type:String,require:true},
     classes:{type:[String],require:true},
+    modelArcheticture:{type:String},
+    modelCategory:{type:String},
     dataset:{type:String},
    createdBy: {
         type: mongoose.Schema.Types.ObjectId,  

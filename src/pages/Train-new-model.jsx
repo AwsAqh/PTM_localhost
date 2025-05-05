@@ -6,22 +6,47 @@ import ClassBlock from '../components/class-block'
 import Header from '../components/header'
 import axios from 'axios';
 
+
+
 const TrainNewModel = () => {
 
   const navigate=useNavigate()
 
-  useEffect((  )=>{
-    const token=localStorage.getItem("token")
-    console.log(token)
-    if(!token) navigate("/login")
-      
+  useEffect(() => {
+    const token = localStorage.getItem("token");
 
-  },[navigate])
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+     
+      const decodedToken = jwt_decode(token);
+      const currentTime = Date.now() / 1000; 
+      console.log("sjakfskfsfjsdfsdf", decodedToken)
+      
+      if (decodedToken.exp < currentTime) {
+        console.log("Token has expired.");
+        localStorage.removeItem("token"); 
+        navigate("/login"); 
+      }
+    } catch (error) {
+      console.log("Error decoding token", error);
+      localStorage.removeItem("token");
+      navigate("/login");
+    }
+  }, [navigate]);
+
 
         const [classes,setClasses]=useState([{id:1, name:"class 1"} , {id:2, name:"class 2"} ])
         const modelName=useRef()
+        const modelArch=useRef()
+        const modelCategory=useRef()
         const clsRefs=useRef(classes.map(item=>React.createRef()))
         const [filesState, setFilesState] = useState(classes.map(() => [])); 
+
+        
 
 
         const handleAddClass = () => {
@@ -61,13 +86,16 @@ const TrainNewModel = () => {
        
 
           const handleSubmit = () => {
+            console.log("the ref for category if it's not selected : ",modelCategory.current.value)
             const names = clsRefs.current.map(ref => ref.current ? ref.current.value : null);
           console.log("inside train new model , , ", localStorage.getItem("token"))
             const formData = new FormData();
-            formData.append("modelName", modelName.current.value);  // Append model name
-            formData.append("classesCount", classes.length); // Number of classes field
+            formData.append("modelName", modelName.current.value);  
+            formData.append("classesCount", classes.length); 
+            formData.append("modelArch",modelArch.current.value)
+            formData.append("category",modelCategory.current.value)
             
-            // Add class names and files dynamically
+           
             classes.forEach((classItem, index) => {
               formData.append(`class_name_${index}`, names[index]); // Add class name dynamically
               const dataset = filesState[index];
@@ -78,13 +106,12 @@ const TrainNewModel = () => {
               }
             });
           
-            // Log the FormData to check the structure
-            console.log([...formData.entries()]);  // This will log all key-value pairs in the FormData
+
           
-            // Send the request
+         
             axios.post('http://localhost:5000/api/classify/upload', formData, {
               headers: {
-                'Content-Type': 'multipart/form-data',  // Ensure correct content type
+                'Content-Type': 'multipart/form-data', 
                 "x-auth-token":localStorage.getItem("token")
               }
             })
@@ -109,6 +136,23 @@ const TrainNewModel = () => {
                     
                     <div className='head'>
                     <input type="text" ref={modelName} placeholder='Model name' class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"/>
+                    <div className='arch-ctg-info'>
+                          <select className='form-select' ref={modelArch} onChange={()=>console.log(modelArch.current.value)}>
+                              <option value="resnet50" disabled selected>archetictur</option>
+                              <option value="resnet50">ResNet50</option>
+                              <option value="googlenet">Googlenet</option>
+                              <option value="mobilenet_v2">Mobilenet_v2</option>
+                              
+                          </select>
+
+                          <select className='form-select' ref={modelCategory}>
+                          <option value="other" disabled selected>Category</option>
+                          <option value="plants">Plants</option>
+                          <option value="animals_diseases">Animals diseases</option>
+                          <option value="entertainment">Entertainment</option>
+                          
+                          </select>
+                    </div>
                     </div>
 
                     <div className='classes-list'>
