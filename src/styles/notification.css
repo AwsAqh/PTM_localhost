@@ -1,0 +1,113 @@
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 15px 20px;
+  border-radius: 4px;
+  color: white;
+  z-index: 1000;
+  animation: slideIn 0.3s ease-out;
+  min-width: 300px;
+}
+
+.notification.error {
+  background-color: #dc3545;
+}
+
+.notification.success {
+  background-color: #28a745;
+}
+
+.notification.loading {
+  background-color: #2196f3;
+}
+
+.notification-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.notification-message {
+  font-size: 14px;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.notification-message.loading::after {
+  content: '';
+  width: 20px;
+  height: 20px;
+  border: 2px solid white;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+}
+
+.notification-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.notification-button {
+  padding: 6px 12px;
+  border: 1px solid white;
+  border-radius: 4px;
+  background: transparent;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  min-width: 60px;
+  text-align: center;
+  display: inline-block;
+}
+
+.notification-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.notification-button.primary {
+  background: white;
+  color: #28a745;
+}
+
+.notification-button.primary:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  margin-left: 10px;
+}
+
+.close-button:hover {
+  opacity: 0.8;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+} 

@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const router = express.Router();
 
 
-router.post('/upload', upload.any(), (req, res, next) => {
+router.post('/train', upload.any(), (req, res, next) => {
     console.log("Verifying token...");
 
     let token;

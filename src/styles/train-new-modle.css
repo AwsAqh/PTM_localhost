@@ -23,6 +23,17 @@
 .head>input{
     width: 45%;}
 
+    .head > input:invalid {
+        border-color: red; /* Optional: Add a red border for invalid input */
+      }
+      
+      .head > input:required:invalid:after {
+        content: " *"; /* The red star */
+        color: red;
+        font-weight: bold;
+        margin-left: 5px; /* Adds some space between the input text and the star */
+      }
+
 .arch-ctg-info{
     width: 45%;
    

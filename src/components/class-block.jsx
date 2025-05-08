@@ -1,17 +1,19 @@
 import React, { useState } from 'react'
 import "../styles/class-block.css"
 import Button from './Button'
-const ClassBlock = ({ onDelete, id, elref,fileState,setter,onFileChange }) => {
+const ClassBlock = ({ onDelete, id, elref,onFileChange,classesCount }) => {
 
-    const [fileName, setFileName] = useState("upload")
-    
+    const [fileName, setFileName] = useState("Upload")
+    const [isValid, setIsValid] = useState(true); 
 
-  
+    const handleInputChange = (e) => {
+      setIsValid(e.target.value.trim() !== "");  // Check if input is not empty
+    };
   
     return (
-      <div className='class-block'>
+      <div className={`class-block ${isValid ? '' : 'invalid'}`}>
         <div className='class-name'>
-          <input  ref={elref} placeholder="Class name" type='text' />
+          <input required ref={elref} placeholder="Class name" type='text' onChange={handleInputChange}  />
         </div>
         
         <div className='class-options'>
@@ -29,7 +31,7 @@ const ClassBlock = ({ onDelete, id, elref,fileState,setter,onFileChange }) => {
           </label>
   
     
-          <Button type="button" className="btn btn-secondary btn-sm" onClick={() => { onDelete(id); }}>
+          <Button disabled={classesCount === 2}   type="button" className="btn btn-secondary btn-sm" onClick={() => { onDelete(id); }}>
             Delete
           </Button>
         </div>

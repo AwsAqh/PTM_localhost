@@ -85,18 +85,18 @@ const handleTrainNewModel = async (req, res) => {
           modelCategory:modelCategory,
           createdBy: req.userId
       });
-      await newModel.save();
-  } catch (error) {
+      const savedModel = await newModel.save();
+      res.json({
+        message: 'Model trained successfully!',
+        modelName: modelNameWithUniqueId, 
+        classNames: classNames,
+        modelPath: modelPath,
+        modelId: savedModel._id
+      });
+    } catch (error) {
       console.log("Error saving model document:", error);
-  }
-  
-  
-    res.json({
-      message: 'Files uploaded and training started successfully!',
-      modelName: modelNameWithUniqueId, 
-      classNames: classNames,
-      modelPath: modelPath, 
-    });
+      res.status(500).json({ message: 'Error saving model document', error: error.message });
+    }
   } catch (error) {
     console.error('Error triggering training:', error);
     res.status(500).json({ message: 'Error starting model training', error: error.message });

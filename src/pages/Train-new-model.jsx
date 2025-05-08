@@ -4,6 +4,7 @@ import "../styles/train-new-modle.css"
 import Button from '../components/Button'
 import ClassBlock from '../components/class-block'
 import Header from '../components/header'
+import Notification from '../components/Notification'
 import axios from 'axios';
 
 
@@ -11,7 +12,14 @@ import axios from 'axios';
 const TrainNewModel = () => {
 
   const navigate=useNavigate()
-
+  const [notification, setNotification] = useState({ 
+    show: false,
+    message: '',
+    type: '',
+    actions: []
+  });
+  const [userId,setUserId]=useState(null) 
+  //secure the page
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -24,7 +32,7 @@ const TrainNewModel = () => {
      
       const decodedToken = jwt_decode(token);
       const currentTime = Date.now() / 1000; 
-      console.log("sjakfskfsfjsdfsdf", decodedToken)
+      setUserId(decodedToken.userId)
       
       if (decodedToken.exp < currentTime) {
         console.log("Token has expired.");
@@ -37,6 +45,19 @@ const TrainNewModel = () => {
       navigate("/login");
     }
   }, [navigate]);
+
+  // Add effect for auto-hiding notification
+  useEffect(() => {
+    let timer;
+    if (notification.show && notification.type !== 'loading') {
+      timer = setTimeout(() => {
+        setNotification(prev => ({ ...prev, show: false }));
+      }, 3000);
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [notification.show, notification.type]);
 
 
         const [classes,setClasses]=useState([{id:1, name:"class 1"} , {id:2, name:"class 2"} ])
@@ -61,7 +82,7 @@ const TrainNewModel = () => {
             });
           };
         
-          // Function to handle removing a class
+          
           const handleDeleteClass = (id) => {
             setClasses((prevClasses) => {
               const newClasses = prevClasses.filter(classItem => classItem.id !== id);
@@ -82,18 +103,61 @@ const TrainNewModel = () => {
           };
         
        
-       
+        const handleValidation=()=>{
+          const emptyOnes=clsRefs.current.filter(ref=>ref.current.value.trim()==="")
+          
+          if (!modelName.current.value.trim()) {
+            setNotification({
+              show: true,
+              message: 'Please enter a model name',
+              type: 'error'
+            });
+            return;
+          }
+          
+          if (emptyOnes.length > 0) {
+            setNotification({
+              show: true,
+              message: 'Please fill in all class names',
+              type: 'error'
+            });
+            return;
+          }
+
+          if (modelArch.current.value === 'default' || modelCategory.current.value === 'default') {
+            setNotification({
+              show: true,
+              message: 'Please select both architecture and category',
+              type: 'error'
+            });
+            return;
+          }
+
+          // Check if files are uploaded for all classes
+          const emptyFiles = filesState.some(files => !files || files.length === 0);
+          if (emptyFiles) {
+            setNotification({
+              show: true,
+              message: 'Please upload files for all classes',
+              type: 'error'
+            });
+            return;
+          }
+
+          handleSubmit();
+        }
        
 
           const handleSubmit = () => {
             console.log("the ref for category if it's not selected : ",modelCategory.current.value)
             const names = clsRefs.current.map(ref => ref.current ? ref.current.value : null);
-          console.log("inside train new model , , ", localStorage.getItem("token"))
+            console.log("inside train new model , , ", localStorage.getItem("token"))
             const formData = new FormData();
             formData.append("modelName", modelName.current.value);  
             formData.append("classesCount", classes.length); 
             formData.append("modelArch",modelArch.current.value)
             formData.append("category",modelCategory.current.value)
+            formData.append("userId",userId)  
             
            
             classes.forEach((classItem, index) => {
@@ -105,11 +169,16 @@ const TrainNewModel = () => {
                 });
               }
             });
-          
 
+            // Show loading notification
+            setNotification({
+              show: true,
+              message: 'Training model...',
+              type: 'loading',
+              actions: []
+            });
           
-         
-            axios.post('http://localhost:5000/api/classify/upload', formData, {
+            axios.post('http://localhost:5000/api/classify/train', formData, {
               headers: {
                 'Content-Type': 'multipart/form-data', 
                 "x-auth-token":localStorage.getItem("token")
@@ -117,9 +186,30 @@ const TrainNewModel = () => {
             })
               .then((response) => {
                 console.log('Files uploaded:', response.data);
+                setNotification({
+                  show: true,
+                  message: 'Model trained successfully!',
+                  type: 'success',
+                  actions: [
+                    {
+                      label: 'Use',
+                      type: 'primary',
+                      onClick: () => navigate(`/classify/${response.data.modelId}`)
+                    },
+                    {
+                      label: 'OK',
+                      onClick: () => setNotification(prev => ({ ...prev, show: false }))
+                    }
+                  ]
+                });
               })
               .catch((error) => {
                 console.error('Error uploading files:', error);
+                setNotification({
+                  show: true,
+                  message: 'Error training model. Please try again.',
+                  type: 'error'
+                });
               });
           };
           
@@ -132,13 +222,22 @@ const TrainNewModel = () => {
     return (
     <div className='full-page-container'>
         <Header/>
+        {notification.show && (
+          <Notification
+            message={notification.message}
+            type={notification.type}
+            actions={notification.actions}
+            onClose={() => setNotification(prev => ({ ...prev, show: false }))}
+          />
+        )}
             <div className='newModel-container' >
                     
                     <div className='head'>
-                    <input type="text" ref={modelName} placeholder='Model name' class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"/>
+                    <input required type="text" ref={modelName} placeholder='Model name' class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"/>
+                    
                     <div className='arch-ctg-info'>
                           <select className='form-select' ref={modelArch} onChange={()=>console.log(modelArch.current.value)}>
-                              <option value="resnet50" disabled selected>archetictur</option>
+                              <option value="default" disabled selected>Architecture</option>
                               <option value="resnet50">ResNet50</option>
                               <option value="googlenet">Googlenet</option>
                               <option value="mobilenet_v2">Mobilenet_v2</option>
@@ -146,10 +245,11 @@ const TrainNewModel = () => {
                           </select>
 
                           <select className='form-select' ref={modelCategory}>
-                          <option value="other" disabled selected>Category</option>
+                          <option value="default" disabled selected>Category</option>
                           <option value="plants">Plants</option>
                           <option value="animals_diseases">Animals diseases</option>
                           <option value="entertainment">Entertainment</option>
+                          <option value="other">Other</option>
                           
                           </select>
                     </div>
@@ -166,7 +266,8 @@ const TrainNewModel = () => {
                             onFileChange={(e) => handleFileChange(e.target.files, index)}
                             onDelete={handleDeleteClass}
                              key={classItems.id}
-                              id={classItems.id} />)}
+                              id={classItems.id}
+                              classesCount={classes.length} />)}
                                 
                     </div>
 
@@ -175,7 +276,7 @@ const TrainNewModel = () => {
 
                     <div className='user-options'>
 
-                            <Button type="button" className="btn btn-primary" onClick={handleSubmit} > Train </Button>
+                            <Button type="button" className="btn btn-primary" onClick={handleValidation} > Train </Button>
 
                             <Button  type="button" className="btn btn-secondary" onClick={handleAddClass} >Add class</Button>
 

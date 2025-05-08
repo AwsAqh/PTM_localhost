@@ -30,6 +30,7 @@ const handleFormSubmit=async(e)=>{
             const data=await response.json()
             if(response.ok) {
                     localStorage.setItem("token",data.token)
+                    console.log("token")
                     navigate("/home")
             }
             else (setError(data.msg)) 
