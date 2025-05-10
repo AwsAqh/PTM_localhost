@@ -61,13 +61,10 @@ const handleTrainNewModel = async (req, res) => {
   try {
     console.log("Trying to train with model name:", modelNameWithUniqueId);
     
-    
     const response = await axios.post('http://127.0.0.1:5000/train', {
       modelName: modelNameWithUniqueId,  
       classes: classNames,
       modelArch,
-      
-      
     });
     const modelPath = response.data.modelPath;  
     
@@ -78,11 +75,11 @@ const handleTrainNewModel = async (req, res) => {
       console.log(" id id :" , req.userId)
       const newModel = new Model({
           name: req.body.modelName,
-          modelNameOnCloud:modelNameWithUniqueId,
+          modelNameOnCloud: modelNameWithUniqueId,
           path: "./models/" + modelPath,
-          classes:classNames,
-          modelArcheticture:modelArch,
-          modelCategory:modelCategory,
+          classes: classNames,
+          modelArcheticture: modelArch,
+          modelCategory: modelCategory,
           createdBy: req.userId
       });
       const savedModel = await newModel.save();
