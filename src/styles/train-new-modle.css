@@ -1,66 +1,173 @@
-.newModel-container{
+html, body {
+    background: #1a1a1a !important;
+    min-height: 100vh;
+}
 
+.full-page-container {
+    min-height: 100vh;
+    width: 100%;
+    background-color: #1a1a1a;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-
-    height: 100vh;
-    width: 100%;
-   
-    gap: 20%;
-    overflow-y: auto;
-    
+    padding-top: 64px;
 }
 
-
-
-
-.newModel-container>div{ 
-    width: 70%; justify-content: center; align-items: center ; }
-
-.head{ display: flex; align-items: center; flex-direction: column; gap: 4vh; }
-.head>input{
-    width: 45%;}
-
-    .head > input:invalid {
-        border-color: red; /* Optional: Add a red border for invalid input */
-      }
-      
-      .head > input:required:invalid:after {
-        content: " *"; /* The red star */
-        color: red;
-        font-weight: bold;
-        margin-left: 5px; /* Adds some space between the input text and the star */
-      }
-
-.arch-ctg-info{
-    width: 45%;
-   
-    gap: 2%;
-     display:  flex;
+.newModel-container {
+    width: 90%;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-
+    gap: 20px;
+    padding: 20px;
+    box-sizing: border-box;
+    position: relative;
+    min-height: calc(100vh - 80px); /* Account for header */
+    margin: 0 auto;
+    background: none;
+    padding-bottom: 32px;
 }
-.arch-ctg-info>select{
-    width: 50%;
-    border-radius: 10px;
 
+.newModel-container > div { 
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: none;
 }
 
+.head { 
+    display: flex; 
+    align-items: center; 
+    flex-direction: column; 
+    gap: 20px; 
+    width: 100%; 
+    justify-content: center;
+    margin: 0 auto;
+}
 
-.classes-list{
-     display: flex;
-    min-height: 30%; 
-    height: auto;
-     gap: 4%;
-    
+.head > input, .arch-ctg-info {
+    margin: 0 auto;
+    display: block;
+    text-align: center;
+}
+
+.head > input {
+    width: 100%;
+    max-width: 500px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.head > input:invalid {
+    border-color: red;
+}
+
+.arch-ctg-info {
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
     flex-wrap: wrap;
-
 }
 
+.arch-ctg-info > select {
+    width: 100%;
+    max-width: 240px;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    margin: 0 auto;
+    text-align: center;
+}
 
+.classes-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    justify-content: center;
+    width: 100%;
+    background: none;
+    max-height: calc(100vh - 300px); /* header + bar + some margin */
+    overflow-y: auto;
+    padding-bottom: 20px;
+}
 
-.user-options{ display: flex; gap: 5%;   }
-.user-options>button{ height: 100% ; width: 20%; }
+.user-options {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 20px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    max-width: 100vw;
+    background-color: #1a1a1a;
+    padding: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 1000;
+    margin: 0;
+}
+
+.user-options > button { 
+    min-width: 120px; 
+    padding: 12px 24px; 
+    border: none; 
+    border-radius: 5px; 
+    background-color: #4a6bcf; 
+    color: white; 
+    cursor: pointer; 
+    transition: background-color 0.3s ease; 
+}
+
+.user-options > button:hover { 
+    background-color: #3a5bbf; 
+}
+
+@media (max-width: 768px) {
+    .newModel-container {
+        width: 100%;
+        padding: 15px;
+    }
+
+    .user-options {
+        padding: 15px;
+    }
+
+    .classes-list {
+        gap: 28px;
+        max-height: calc(100vh - 380px); /* header + bar + class block height for tablet */
+        padding-bottom: 32px;
+    }
+
+    .user-options button {
+        flex: 1;
+        max-width: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    .newModel-container {
+        padding: 10px;
+    }
+
+    .user-options {
+        padding: 10px;
+    }
+
+    .classes-list {
+        gap: 24px;
+        max-height: calc(100vh - 340px); /* header + bar + class block height for mobile */
+        padding-bottom: 40px;
+    }
+
+    .user-options button {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+}

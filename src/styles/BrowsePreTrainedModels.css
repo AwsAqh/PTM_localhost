@@ -1,24 +1,105 @@
-
-
-.models-page-container{
-
-    height: 100vh;
+.models-page-container {
+    min-height: 100vh;
     width: 100%;
+    background: #1a1a1a;
     display: flex;
     flex-direction: column;
-    
     align-items: center;
+    padding: 24px 0;
 }
 
-.models-container{
-    padding-top: 2%;
-height: 100vh;
-width: 50%;
-display: flex;
-flex-wrap: wrap;
-justify-content: center;
+.models-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 32px 0 0 0;
+}
 
-justify-content: space-around;
-gap: 2%;
+.block-container {
+    background: #232323;
+    border: 2px solid #4a6bcf;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+    color: #fff;
+    width: 320px;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 16px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
 
+.block-container:hover {
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 6px 24px rgba(74,107,207,0.18);
+    border-color: #6a8cff;
+}
+
+.model-img {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.model-img > img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #444;
+    background: #181818;
+}
+
+.model-info {
+    width: 100%;
+    text-align: center;
+    margin-top: 8px;
+    font-size: 18px;
+    color: #e0e6f0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+@media (max-width: 900px) {
+    .models-container {
+        gap: 24px;
+    }
+    .block-container {
+        width: 90vw;
+        min-width: 220px;
+        max-width: 340px;
+    }
+}
+
+@media (max-width: 600px) {
+    .models-page-container {
+        padding: 8px 0;
+    }
+    .models-container {
+        gap: 16px;
+        padding: 16px 0 0 0;
+    }
+    .block-container {
+        width: 98vw;
+        min-width: 180px;
+        max-width: 98vw;
+        padding: 16px 4px;
+    }
+    .model-img > img {
+        width: 60px;
+        height: 60px;
+    }
+    .model-info {
+        font-size: 15px;
+    }
 }

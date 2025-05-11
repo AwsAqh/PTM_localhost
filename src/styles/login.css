@@ -5,26 +5,51 @@
     
     height: 100vh;
     width: 100%;
-
+    padding: 20px;
 }
-.banner{background-color: rgb(74, 107, 207); height: 80%; width: 40%; border-radius: 10px;  z-index: 1; display: flex;  flex-direction: column; justify-content: space-around; align-items: center;}
+.banner{background-color: rgb(74, 107, 207); height: auto; min-height: 80%; width: 40%; max-width: 500px; border-radius: 10px;  z-index: 1; display: flex;  flex-direction: column; justify-content: space-around; align-items: center; padding: 20px;}
 
 .banner>img{
-    height:300px ; width: 300px;
+    height: auto;
+    max-height: 300px;
+    width: 100%;
+    max-width: 300px;
+    object-fit: contain;
 }
-.auth-area{border-radius: 10px; background-color: rgb(246, 243, 243); height: 80%; width: 30%; display: flex; flex-direction: column; justify-content: space-around;  align-items: center;}
+.auth-area{border-radius: 10px; background-color: rgb(246, 243, 243); height: auto; min-height: 80%; width: 30%; max-width: 400px; display: flex; flex-direction: column; justify-content: space-around;  align-items: center; padding: 20px;}
 
 .auth-header{display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px;}
 .auth-header>img{height: 20px; width: 20px;}
 
 .auth-form{display: flex;
-    width: 80%;
-    gap: 10px;
+    width: 100%;
+    max-width: 300px;
+    gap: 15px;
     flex-direction: column;
-
 }
 
-form>button{width: 100%;}
+.auth-form input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.auth-form button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    background-color: #4a6bcf;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.auth-form button:hover {
+    background-color: #3a5bbf;
+}
+
 .login-options{
     display: flex;
     gap: 20px;
@@ -118,4 +143,29 @@ form>button{width: 100%;}
   .social-button:hover {
     opacity: 0.8;
   }
+  
+@media (max-width: 1024px) {
+    .auth-page {
+        flex-direction: column;
+        gap: 20px;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .banner, .auth-area {
+        width: 90%;
+        max-width: 500px;
+        margin: 20px 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .banner, .auth-area {
+        width: 95%;
+    }
+
+    .auth-form {
+        width: 90%;
+    }
+}
   
