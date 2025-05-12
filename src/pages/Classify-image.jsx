@@ -15,22 +15,6 @@ const ClassifyImage = () => {
   const [notification, setNotification] = useState({ show: false, message: '', type: '' })
   const [selectedFile, setSelectedFile] = useState(null)
   
-  // Test values for visualization
-  useEffect(() => {
-    if (selectedImage) {
-      // Simulate classification result with test values
-      const testResult = {
-        label: classes[0], // First class as predicted
-        confidences: classes.map((_, index) => {
-          if (index === 0) return 0.85; // 85% confidence for first class
-          if (index === 1) return 0.10; // 10% confidence for second class
-          return 0.05 / (classes.length - 2); // Remaining 5% distributed among other classes
-        })
-      };
-      setClassificationResult(testResult);
-    }
-  }, [selectedImage, classes]);
-
   const {id} = useParams()
   const navigate = useNavigate()
 
