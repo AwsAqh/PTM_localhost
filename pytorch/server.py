@@ -2,6 +2,7 @@ import time
 import subprocess
 import uuid
 from flask import Flask, request, jsonify
+import json
 
 import sys
 
@@ -55,10 +56,15 @@ def classify():
         if result.returncode != 0:
             return jsonify({'error': f"Error classifying image: {result.stderr}"}), 500
 
- 
-        predicted_class = result.stdout.strip() 
-
-        return jsonify({"predicted_class": predicted_class}), 200
+        # Parse the JSON output from classify_image.py
+        try:
+            classification_result = json.loads(result.stdout.strip())
+            return jsonify({
+                "predicted_class": classification_result["predicted_class"],
+                "confidences": classification_result["confidences"]
+            }), 200
+        except json.JSONDecodeError as e:
+            return jsonify({'error': f"Error parsing classification result: {str(e)}"}), 500
 
     except Exception as e:
        

@@ -4,6 +4,7 @@ from PIL import Image
 import requests
 from io import BytesIO
 import sys
+import json
 
 def classify_image(image_url, model_path, model_arch, classes_length):
     if model_arch == 'resnet50':
@@ -41,9 +42,15 @@ def classify_image(image_url, model_path, model_arch, classes_length):
 
     with torch.no_grad(): 
         output = model(img_tensor)
+        probabilities = torch.nn.functional.softmax(output[0], dim=0)
+        predicted_class = torch.argmax(probabilities).item()
+        confidences = probabilities.tolist()
 
-    _, predicted_class = torch.max(output, 1)
-    print(predicted_class.item())  
+    result = {
+        "predicted_class": predicted_class,
+        "confidences": confidences
+    }
+    print(json.dumps(result))
 
 if __name__ == '__main__':
     image_url = sys.argv[1]  

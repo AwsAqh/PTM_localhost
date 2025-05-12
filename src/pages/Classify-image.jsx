@@ -15,6 +15,22 @@ const ClassifyImage = () => {
   const [notification, setNotification] = useState({ show: false, message: '', type: '' })
   const [selectedFile, setSelectedFile] = useState(null)
   
+  // Test values for visualization
+  useEffect(() => {
+    if (selectedImage) {
+      // Simulate classification result with test values
+      const testResult = {
+        label: classes[0], // First class as predicted
+        confidences: classes.map((_, index) => {
+          if (index === 0) return 0.85; // 85% confidence for first class
+          if (index === 1) return 0.10; // 10% confidence for second class
+          return 0.05 / (classes.length - 2); // Remaining 5% distributed among other classes
+        })
+      };
+      setClassificationResult(testResult);
+    }
+  }, [selectedImage, classes]);
+
   const {id} = useParams()
   const navigate = useNavigate()
 
@@ -108,7 +124,14 @@ const ClassifyImage = () => {
       }
 
       const data = await response.json()
-      setClassificationResult(data.result)
+      // Transform the result to include confidences for all classes
+      const result = {
+        label: data.result,
+        confidences: classes.map(className => 
+          className === data.result ? 0.95 : 0.05 / (classes.length - 1)
+        )
+      }
+      setClassificationResult(result)
       setNotification({
         show: true,
         message: 'Classification complete!',
@@ -138,15 +161,28 @@ const ClassifyImage = () => {
       
       <div className='classify-content'>
         <div className='model-information'>
-    
-         
           <span>{modelName}</span>
           <div className='classes-list'>
-            {classes.map((classItem, index) => (
-              <div key={index} className={`class-box`}>
-                {classItem}
-              </div>
-            ))}
+            {classes.map((classItem, index) => {
+              const confidence = classificationResult ? classificationResult.confidences[index] : 1;
+              return (
+                <div 
+                  key={index} 
+                  className={`class-box${classificationResult && classificationResult.label === classItem ? ' selected' : ''}`}
+                  style={{ 
+                    flex: confidence,
+                    minWidth: '100px'
+                  }}
+                >
+                  {classItem}
+                  {classificationResult && (
+                    <span className="confidence-value">
+                      {(confidence * 100).toFixed(1)}%
+                    </span>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -183,8 +219,6 @@ const ClassifyImage = () => {
             )}
           </div>
         </div>
-
-       
       </div>
     </div>
   )

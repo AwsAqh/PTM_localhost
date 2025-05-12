@@ -168,10 +168,14 @@ const classifyImage = async (req, res) => {
       })
         .then(response => {
           const result = response.data.predicted_class;
+          const confidences = response.data.confidences;
           console.log("Classification result:", result);
+          console.log("Confidences:", confidences);
           
-          
-          res.status(200).json({ result:model.classes[result] });
+          res.status(200).json({ 
+            result: model.classes[result],
+            confidences: confidences
+          });
         })
         .catch(err => {
           if (err.response) {
