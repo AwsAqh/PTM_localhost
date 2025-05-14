@@ -76,6 +76,7 @@ const handleTrainNewModel = async (req, res) => {
       const newModel = new Model({
           name: req.body.modelName,
           modelNameOnCloud: modelNameWithUniqueId,
+          modelDescription: req.body.modelDescription,
           path: "./models/" + modelPath,
           classes: classNames,
           modelArcheticture: modelArch,
@@ -200,9 +201,9 @@ const getModelClasses=async(req,res)=>{
 const {id}=req.params
 
   try{
-    const model=await Model.findById(id ,"classes name")
+    const model=await Model.findById(id ,"classes name modelDescription")
     console.log("mode classes : ",model.classes)
-    res.status(200).json({classes:model.classes,modelName:model.name})
+    res.status(200).json({classes:model.classes,modelName:model.name,modelDescription:model.modelDescription})
   }
   catch(err){
     console.log("error retrieving classes from database : ",err)

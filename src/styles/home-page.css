@@ -1,6 +1,8 @@
 .main-page-container{
-    height: 100%;
+    min-height: calc(100vh - 64px);
     width: 100%;
+    box-sizing: border-box;
+    background: #1A1A1A1A;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -47,8 +49,11 @@
 }
 
 .full-page-container{
-    height: 100%;
+    min-height: calc(100vh - 64px);
     width: 100%;
+    background: #181a20;
     display: flex;
     flex-direction: column;
+    position: relative;
+    overflow-x: hidden;
 }

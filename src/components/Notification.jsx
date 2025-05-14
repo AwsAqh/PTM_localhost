@@ -1,11 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import '../styles/notification.css';
 
 const Notification = ({ message, type, onClose, actions }) => {
+  useEffect(() => {
+    if (type !== 'loading') {
+      const timer = setTimeout(onClose, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [type, onClose]);
+
   console.log('Notification props:', { message, type, actions }); // Debug log
   return (
     <div className={`notification ${type}`}>
-      <div className="notification-content">
+      <div className={`notification-content ${type}`}>
         <span className={`notification-message ${type === 'loading' ? 'loading' : ''}`}>
           {message}
         </span>

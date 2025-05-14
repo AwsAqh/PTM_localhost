@@ -9,12 +9,13 @@ import Notification from '../components/Notification'
 const ClassifyImage = () => {
   const [classes, setClasses] = useState([])
   const [modelName, setModelName] = useState('')
+  const [modelDescription, setModelDescription] = useState('')
   const [selectedImage, setSelectedImage] = useState(null)
   const [classificationResult, setClassificationResult] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const [notification, setNotification] = useState({ show: false, message: '', type: '' })
   const [selectedFile, setSelectedFile] = useState(null)
-  
+
   const {id} = useParams()
   const navigate = useNavigate()
 
@@ -55,6 +56,7 @@ const ClassifyImage = () => {
           const data = await response.json()
           setClasses(data.classes)
           setModelName(data.modelName)
+          setModelDescription(data.modelDescription || '')
         }
       } catch(err) {
         setNotification({
@@ -146,6 +148,9 @@ const ClassifyImage = () => {
       <div className='classify-content'>
         <div className='model-information'>
           <span>{modelName}</span>
+          {modelDescription && (
+            <div className='model-desc'>{modelDescription}</div>
+          )}
           <div className='classes-list'>
             {classes.map((classItem, index) => {
               const confidence = classificationResult ? classificationResult.confidences[index] : 1;

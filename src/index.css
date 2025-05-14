@@ -1,24 +1,26 @@
-
-
-
 body {
-
-  width: 100%;
   min-height: 100vh;
   font-family: "poppins" ,sans-serif;
+  background-color: #213547;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 #root{
   margin: 0px;
   padding: 0px;
   background-color: #213547;
-  height: 100vh;
-  width: 100%;
+  height: auto;
 }
 
-
-
-
+html, body {
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 @media (prefers-color-scheme: light) {
   :root {

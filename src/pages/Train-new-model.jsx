@@ -62,6 +62,7 @@ const TrainNewModel = () => {
 
         const [classes,setClasses]=useState([{id:1, name:"class 1"} , {id:2, name:"class 2"} ])
         const modelName=useRef()
+        const modelDescription=useRef()
         const modelArch=useRef()
         const modelCategory=useRef()
         const clsRefs=useRef(classes.map(item=>React.createRef()))
@@ -154,6 +155,7 @@ const TrainNewModel = () => {
             console.log("inside train new model , , ", localStorage.getItem("token"))
             const formData = new FormData();
             formData.append("modelName", modelName.current.value);  
+            formData.append("modelDescription", modelDescription.current.value)
             formData.append("classesCount", classes.length); 
             formData.append("modelArch",modelArch.current.value)
             formData.append("category",modelCategory.current.value)
@@ -234,7 +236,7 @@ const TrainNewModel = () => {
                     
                     <div className='head'>
                     <input required type="text" ref={modelName} placeholder='Model name' class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"/>
-                    
+                    <textarea required type="text" ref={modelDescription} placeholder='Model description' class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"/>
                     <div className='arch-ctg-info'>
                           <select className='form-select' ref={modelArch} onChange={()=>console.log(modelArch.current.value)}>
                               <option value="default" disabled selected>Architecture</option>

@@ -1,12 +1,11 @@
 .header {
-    /* position: fixed; */
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    min-width: 0;
     margin: 0;
-    padding: 0;
-    background: #181a20;
+    padding: 0 32px;
+    background: linear-gradient(90deg, #181a20 80%, #23263a 100%);
     color: #fff;
     display: flex;
     align-items: center;
@@ -14,7 +13,8 @@
     box-sizing: border-box;
     z-index: 1001;
     height: 64px;
-    /* overflow-x: auto; */
+    border-bottom: 1.5px solid #23263a;
+    box-shadow: 0 2px 8px rgba(33, 150, 243, 0.04);
 }
 
 .header * {
@@ -23,7 +23,7 @@
 
 .ptm-title h2 {
     margin: 0;
-    padding: 0 20px;
+    padding: 0 20px 0 0;
     font-size: 2rem;
     font-weight: 700;
     letter-spacing: 2px;
@@ -35,7 +35,7 @@
     display: flex;
     align-items: center;
     gap: 16px;
-    padding: 0 20px;
+    padding: 0 0 0 20px;
     cursor: pointer;
     font-size: 1rem;
     color: #fff;
@@ -55,17 +55,15 @@
         flex-direction: row;
         align-items: center;
         text-align: left;
-        padding: 0;
+        padding: 0 10px;
     }
-
     .header > div {
         width: auto;
         text-align: left;
     }
-
     .header-options {
         justify-content: flex-end;
-        padding: 0 10px;
+        padding: 0 0 0 10px;
         max-width: 100%;
         min-width: 0;
     }
@@ -73,22 +71,22 @@
 
 @media (max-width: 480px) {
     .header {
-        padding: 10px;
+        padding: 0 4px;
     }
-
     .header-options {
         gap: 10px;
     }
 }
 
-html, body, #root {
+/* Add padding to main content to account for fixed header */
+.classify-page-container,
+.models-page-container,
+.full-page-container {
+    margin-top: 64px;
+    min-height: calc(100vh - 64px);
     width: 100%;
-    min-width: 0;
-    max-width: 100%;
-    overflow-x: hidden !important;
-    margin: 0;
-    padding: 0;
-    background: #181a20 !important;
+    box-sizing: border-box;
+    background: #181a20;
 }
 
 .btn-primary {
@@ -105,11 +103,6 @@ html, body, #root {
 
 .btn-primary:hover, .btn-primary:focus {
     background-color: #3a5bbf !important;
-}
-
-.full-page-container,
-.models-page-container {
-    background: #181a20;
 }
 
 .result-bar-container {

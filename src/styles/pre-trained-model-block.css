@@ -30,4 +30,23 @@ border: 1px solid white;
 
 }
 
+.model-name {
+    font-weight: 600;
+    font-size: 1.05em;
+    margin-bottom: 2px;
+    color: #fff;
+}
+
+.model-desc {
+    font-size: 0.93em;
+    color: #b0c4de;
+    font-style: italic;
+    margin-bottom: 8px;
+    line-height: 1.4;
+    max-height: 2.8em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+}
+
 
