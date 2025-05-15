@@ -3,7 +3,7 @@ const cloudinary = require('../cloudinaryConfig');
 const axios = require('axios');
 const uuid = require('uuid'); 
 const Model=require("../models/models");
-
+const User=require("../models/users");
 
 const storage = multer.memoryStorage();
 
@@ -102,20 +102,22 @@ const handleTrainNewModel = async (req, res) => {
 };
 
 
-const getModels=async(req,res)=>{
-
-    try{
-      
-      
-      const models=await Model.find();
-      res.status(200).json(models)
-    
-    }catch(error){
-      console.error("Can't retrieve models from DB:", error);
-        res.status(500).json({msg:" error retrieving data "})
-
+const getModels = async (req, res) => {
+    try {
+        const models = await Model.find();
+        const modelsWithUsers = await Promise.all(models.map(async model => {
+            const user = await User.findById(model.createdBy);
+            return {
+                ...model.toObject(),
+                creatorEmail: user.email,
+                creatorName: user.name
+            };
+        }));
+        res.status(200).json(modelsWithUsers);
+    } catch(error) {
+        console.error("Can't retrieve models from DB:", error);
+        res.status(500).json({msg: "error retrieving data"});
     }
-
 }
 
 const classifyImage = async (req, res) => {

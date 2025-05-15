@@ -1,7 +1,6 @@
 .full-page-container {
-    min-height: 100%;
     width: 100%;
-    
+    justify-content: center;
     background-color: #1a1a1a;
     display: flex;
     flex-direction: column;
@@ -19,7 +18,7 @@
     padding: 20px;
     box-sizing: border-box;
     position: relative;
-    min-height: calc(100vh - 80px); /* Account for header */
+   
     margin: 0 auto;
     background: none;
     padding-bottom: 32px;

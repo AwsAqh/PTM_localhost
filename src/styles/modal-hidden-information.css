@@ -1,0 +1,115 @@
+.modal-dialog {
+    position: absolute;
+    left: 0;
+    top: 48px;  /* or as needed */
+    width: 220px;
+    height: 260px;         /* <-- Fixed height */
+    z-index: 1000;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    background: none;
+    margin: 0;
+    overflow: hidden;      /* Ensures content doesn't overflow the modal */
+}
+.modal-content {
+    background-color: rgba(33, 37, 41, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.13);
+    color: #fff;
+    padding: 12px 16px 10px 16px;
+    border-radius: 8px;
+    height: 100%;          /* Fill the modal-dialog */
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    padding-bottom: 6px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.modal-title {
+    font-size: 1.05em;
+    margin: 0;
+    color: #fff;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
+
+.modal-body {
+    padding-top: 4px;
+    overflow-y: auto;      /* Scrolls if content is too long */
+    flex: 1 1 auto;        /* Take up remaining space */
+    min-height: 0;         /* Required for flexbox scrolling */
+}
+
+.modal-body p {
+    margin: 4px 0;
+    font-size: 0.97em;
+    color: #b0c4de;
+    line-height: 1.4;
+}
+
+.btn-close {
+    background-color: transparent;
+    border: none;
+    color: #fff;
+    opacity: 0.7;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    margin-left: 8px;
+}
+
+.btn-close:hover {
+    opacity: 1;
+}
+
+.modal {
+    position: absolute;
+    z-index: 1000;
+    min-width: 180px;
+    min-height: 60px;
+}
+
+.modal.right {
+    left: 100%;
+    top: 0;
+    margin-left: 8px;
+    margin-top: 0;
+    width: 220px;
+    max-width: 90vw;
+}
+
+.modal.left {
+    right: 100%;
+    top: 0;
+    margin-right: 8px;
+    margin-top: 0;
+    width: 220px;
+    max-width: 90vw;
+}
+
+.modal.bottom {
+    left: 0;
+    top: 100%;
+    margin-top: 8px;
+    width: 100%;
+    max-width: 100%;
+}
+
+.modal.top {
+    left: 0;
+    bottom: 100%;
+    margin-bottom: 8px;
+    width: 100%;
+    max-width: 100%;
+}
+
+.models-container {
+    padding: 24px 32px; /* add enough padding for modal to fit */
+}
+    

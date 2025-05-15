@@ -9,7 +9,7 @@
 }
 
 .models-page-container {
-    min-height: 100vh;
+    
     background: #1a1a1a;
     display: flex;
     flex-direction: column;

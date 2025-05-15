@@ -32,6 +32,7 @@ const BrowsePreTrainedModels = () => {
         localStorage.removeItem('token')
         navigate('/login')
       }
+
     } catch(err) {
       console.log("failed to decode token ",err)
       localStorage.removeItem('token')
@@ -108,6 +109,11 @@ const BrowsePreTrainedModels = () => {
             key={index} 
             modelName={model.name} 
             modelDescription={model.modelDescription} 
+            modelCategory={model.modelCategory}
+            modelCreatedAt={model.createdAt}
+            modelCreatedBy={model.creatorName}
+            modelCreatorEmail={model.creatorEmail}
+       
             id={model._id} 
           />
         )}
