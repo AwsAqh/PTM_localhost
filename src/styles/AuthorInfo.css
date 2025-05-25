@@ -1,0 +1,44 @@
+.model-creator-area{ width: 25%;margin: 20px;}
+.model-creator-area>div{ border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);height: 100%; background-color:rgba(240, 248, 255, 0.121) ;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: space-around;
+color: aliceblue;}
+
+.container{width: 100%;}
+
+.user-info{
+    gap: 5px;
+    text-align: center;
+    font-size: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.user-info>.svg{
+    display: flex;
+   
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(240, 248, 255, 0.282);
+    margin: 20px;
+    border-radius: 50%;
+}
+.container>ul {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.container>ul>li {
+    font-size: 12px;
+    border-bottom: 1px solid wheat;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 12px;
+    display: block;
+}

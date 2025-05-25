@@ -1,5 +1,6 @@
 const multer = require('multer');
 const cloudinary = require('../cloudinaryConfig'); 
+
 const axios = require('axios');
 const uuid = require('uuid'); 
 const Model=require("../models/models");
@@ -203,9 +204,16 @@ const getModelClasses=async(req,res)=>{
 const {id}=req.params
 
   try{
-    const model=await Model.findById(id ,"classes name modelDescription")
+    const model=await Model.findById(id ,"classes name modelDescription createdBy")
+    const user=await User.findById(model.createdBy,"name email")
     console.log("mode classes : ",model.classes)
-    res.status(200).json({classes:model.classes,modelName:model.name,modelDescription:model.modelDescription})
+    res.status(200).json({classes:model.classes,
+      modelName:model.name,
+      modelDescription:model.modelDescription,
+      createdBy:model.createdBy, 
+      authorName:user.name, 
+      authorEmail:user.email})
+      
   }
   catch(err){
     console.log("error retrieving classes from database : ",err)
@@ -213,11 +221,59 @@ const {id}=req.params
   }
 }
 
+const getModelsByUser=async(req,res)=>{
+  const {id}=req.params
+  try{
+    const user=await User.findById(id,"name")
+    const models=await Model.find({createdBy:id})
+    if(!models){
+      return res.status(404).json({msg:"no models found"})
+    }
+  
+    res.status(200).json({models:models,userName:user.name})
+  }
+  catch(err){
+    console.log("error retrieving models from database : ",err)
+    res.status(500).json({msg:"error happend while retrieving models from database"})
+  }
+}
+
+const getModelDataset = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const model=await Model.findById(id,"modelNameOnCloud classes")
+    const classes=model.classes
+    const modelNameOnCloud=model.modelNameOnCloud
+    const dataset = [];
+    for (const className of classes) {
+      const searchExpr = `public_id:"dataset/${modelNameOnCloud}/${className}/*"`;
+      const result = await cloudinary.search
+        .expression(searchExpr)
+        .sort_by('public_id', 'desc')
+        .max_results(500)
+        .execute();
+      const images = Array.isArray(result.resources) ? result.resources.map(r => r.secure_url) : [];
+      
+      dataset.push({
+        className,
+        images
+      });
+    }
+    res.status(200).json(dataset);
+  } catch (err) {
+    console.log("error retrieving dataset from database : ", err);
+    res.status(500).json({ msg: "error happend while retrieving dataset from database" });
+  }
+}
+
+
 
 module.exports = {
   upload,
   handleTrainNewModel,
   getModels,
   classifyImage,
-  getModelClasses
+  getModelClasses,
+  getModelsByUser,
+  getModelDataset
 };

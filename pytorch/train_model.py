@@ -55,14 +55,13 @@ val_transform = transforms.Compose([
 def get_image_urls_from_cloudinary(model_name, class_names):
     image_urls = {}
     for class_name in class_names:
-        # Get all resources for the class
         result = cloudinary.api.resources(type='upload', prefix=f"dataset/{model_name}/{class_name}", max_results=500)
+        print(f"Class {class_name} - Found {len(result['resources'])} resources")
+        for res in result['resources']:
+            print(res['secure_url'])
         image_urls[class_name] = [resource['secure_url'] for resource in result['resources']]
-        
-        # Validate minimum dataset size
         if len(image_urls[class_name]) < 10:
             raise ValueError(f"Class {class_name} has insufficient images. Minimum 10 images required.")
-            
     return image_urls
 
 class CloudinaryDataset(Dataset):
@@ -77,21 +76,30 @@ class CloudinaryDataset(Dataset):
 
     def __getitem__(self, idx):
         class_name, image_url = self.image_list[idx]
-        response = requests.get(image_url)
-        img = Image.open(BytesIO(response.content))
-        
-       
-        if img.mode != 'RGB':
-            img = img.convert('RGB')
-            
-       
-        if self.is_training:
-            img = train_transform(img)
-        else:
-            img = val_transform(img)
-            
-        label = list(self.image_urls.keys()).index(class_name)
-        return img, label
+        try:
+            response = requests.get(image_url, timeout=10)
+            if response.status_code != 200:
+                print(f"[ERROR] Failed to fetch image: {image_url} (status {response.status_code})")
+                # Optionally, return a blank image or skip
+                raise ValueError("Image fetch failed")
+            content_type = response.headers.get('Content-Type', '')
+            if 'image' not in content_type:
+                print(f"[ERROR] URL did not return an image: {image_url} (Content-Type: {content_type})")
+                raise ValueError("Not an image")
+            img = Image.open(BytesIO(response.content))
+            if img.mode != 'RGB':
+                img = img.convert('RGB')
+            if self.is_training:
+                img = train_transform(img)
+            else:
+                img = val_transform(img)
+            label = list(self.image_urls.keys()).index(class_name)
+            return img, label
+        except Exception as e:
+            print(f"[ERROR] Could not process image {image_url}: {e}")
+            # Optionally, return a dummy image or raise
+            # For now, raise to catch in DataLoader
+            raise
 
 def setup_model(model_arch, num_classes):
     if model_arch == 'resnet50':
@@ -131,8 +139,8 @@ def train_model(model, dataloaders, criterion, optimizer, target_accuracy=0.95, 
     # Add learning rate scheduler
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(
         optimizer, 
-        mode='max',           # Monitor validation accuracy
-        factor=0.5,          # Reduce LR by half
+        mode='max',          
+        factor=0.5,          
         patience=3,          # Wait 3 epochs before reducing
         verbose=True         # Print when LR is reduced
     )
@@ -216,7 +224,7 @@ def train_model(model, dataloaders, criterion, optimizer, target_accuracy=0.95, 
                 val_loss += loss.item() * inputs.size(0)
                 val_corrects += torch.sum(preds == labels.data)
 
-                # Calculate per-class accuracy
+              
                 for i in range(len(labels)):
                     label = labels[i]
                     pred = preds[i]

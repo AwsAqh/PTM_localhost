@@ -29,7 +29,7 @@ def classify_image(image_url, model_path, model_arch, classes_length):
     
     response = requests.get(image_url)
     img = Image.open(BytesIO(response.content))
-
+    img = img.convert('RGB')
     preprocess = transforms.Compose([
         transforms.Resize(256),  
         transforms.CenterCrop(224),  

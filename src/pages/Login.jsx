@@ -14,7 +14,7 @@ const handleFormSubmit=async(e)=>{
     e.preventDefault()    
     console.log("email : ", formEmail.current.value) 
 
-    let url ="http://localhost:5000/api/auth/login"
+    let url ="http://localhost:5050/api/auth/login"
     let body={
         email:formEmail.current.value,
         password:formPassword.current.value}
@@ -28,6 +28,7 @@ const handleFormSubmit=async(e)=>{
                 body:JSON.stringify(body)
             })
             const data=await response.json()
+            console.log("data : ",data)
             if(response.ok) {
                     localStorage.setItem("token",data.token)
                     console.log("token")

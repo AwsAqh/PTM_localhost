@@ -7,6 +7,7 @@ import HomePage from './pages/HomePage'
 import TrainNewModel from './pages/Train-new-model'
 import BrowsePreTrainedModels from './pages/Browse-pre-trained-models'
 import ClassifyImage from './pages/Classify-image'
+import ModelDataset from './pages/ModelDataset'
 
 function App() {
   
@@ -20,7 +21,9 @@ function App() {
           <Route path='/home' element={<HomePage/>} />
           <Route path='/new' element={<TrainNewModel/>}/>
           <Route path="/browse" element={<BrowsePreTrainedModels/>}/>
+          <Route path='/browse/:id' element={<BrowsePreTrainedModels />}/>
           <Route path="/classify/:id" element={<ClassifyImage/>}/>
+          <Route path="/dataset/:id" element={<ModelDataset/>}/>
       </Routes>
    </Router>
   )

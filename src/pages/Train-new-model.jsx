@@ -180,7 +180,7 @@ const TrainNewModel = () => {
               actions: []
             });
           
-            axios.post('http://localhost:5000/api/classify/train', formData, {
+            axios.post('http://localhost:5050/api/classify/train', formData, {
               headers: {
                 'Content-Type': 'multipart/form-data', 
                 "x-auth-token":localStorage.getItem("token")

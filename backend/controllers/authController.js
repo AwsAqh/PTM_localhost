@@ -5,6 +5,7 @@ const User=require("../models/users")
 
 const secretKey="a secret key"
 
+
 exports.register=async(req,res)=>{
     console.log("inside register")
     const seceretKey="a secret key"
@@ -34,13 +35,15 @@ exports.register=async(req,res)=>{
 
 
 exports.login=async (req,res)=>{
-    const {email,password}=req.body
+   console.log("inside login")
+    if(!req.body.email || !req.body.password) return res.status(400).json({msg:"missing email or password"})
+        const {email,password}=req.body
 console.log("login body: ", email , password)
 try{
         
     const checkUser=await User.findOne({email})
     if(!checkUser) res.status(401).json({msg:"email does not exist"})
-    const isMatch=bcrypt.compare(password,checkUser.password)
+    const isMatch=await bcrypt.compare(password,checkUser.password)
     if( isMatch){
         console.log(" info matched !!")
         const token=jwt.sign({userId:checkUser._id},secretKey,{expiresIn:"1h"})

@@ -5,16 +5,19 @@ import "../styles/classifyImage.css"
 import Upload from "../assets/upload-image-for-classification.png"
 import { useParams } from 'react-router-dom'
 import Notification from '../components/Notification'
+import AuthorInfo from '../components/AuthorInfo'
 
 const ClassifyImage = () => {
   const [classes, setClasses] = useState([])
   const [modelName, setModelName] = useState('')
   const [modelDescription, setModelDescription] = useState('')
+  const [createdBy, setCreatedBy] = useState({ id: '123', name: '' , email: '' })
   const [selectedImage, setSelectedImage] = useState(null)
   const [classificationResult, setClassificationResult] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const [notification, setNotification] = useState({ show: false, message: '', type: '' })
   const [selectedFile, setSelectedFile] = useState(null)
+  const [confidence, setConfidence] = useState([])
 
   const {id} = useParams()
   const navigate = useNavigate()
@@ -40,7 +43,7 @@ const ClassifyImage = () => {
   useEffect(() => {
     const getModelClasses = async() => {
       try {
-        const response = await fetch(`http://localhost:5000/api/classify/classes/${id}`,
+        const response = await fetch(`http://localhost:5050/api/classify/classes/${id}`,
           {
             method: 'GET',
             headers: {'Content-type': 'application/json'}
@@ -57,6 +60,8 @@ const ClassifyImage = () => {
           setClasses(data.classes)
           setModelName(data.modelName)
           setModelDescription(data.modelDescription || '')
+          setCreatedBy({ id: data.createdBy, name: data.authorName, email: data.authorEmail })
+         
         }
       } catch(err) {
         setNotification({
@@ -68,6 +73,10 @@ const ClassifyImage = () => {
     }
     getModelClasses()
   }, [id])
+
+  useEffect(() => {
+    console.log("createdBy : ",createdBy)
+  }, [createdBy])
 
   const handleImageSelect = (e) => {
     const file = e.target.files[0]
@@ -100,7 +109,7 @@ const ClassifyImage = () => {
       formData.append("file", file)
       formData.append("modelId", id)
 
-      const response = await fetch("http://localhost:5000/api/classify/classify", {
+      const response = await fetch("http://localhost:5050/api/classify/classify", {
         method: "POST",
         body: formData
       })
@@ -113,9 +122,8 @@ const ClassifyImage = () => {
       // Transform the result to include confidences for all classes
       const result = {
         label: data.result,
-        confidences: classes.map(className => 
-          className === data.result ? 0.95 : 0.05 / (classes.length - 1)
-        )
+        confidences:data.confidences
+        
       }
       setClassificationResult(result)
       setNotification({
@@ -144,7 +152,8 @@ const ClassifyImage = () => {
           onClose={() => setNotification(prev => ({ ...prev, show: false }))}
         />
       )}
-      
+      <div className="page-content">
+        <AuthorInfo createdBy={createdBy} authorEmail={createdBy.email} authorName={createdBy.name} />
       <div className='classify-content'>
         <div className='model-information'>
           <span>{modelName}</span>
@@ -210,6 +219,8 @@ const ClassifyImage = () => {
         </div>
       </div>
     </div>
+    </div>
+   
   )
 }
 

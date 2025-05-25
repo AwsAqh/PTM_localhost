@@ -1,5 +1,5 @@
 const express = require('express');
-const { upload, handleTrainNewModel ,getModels,classifyImage,getModelClasses} = require('../controllers/modelsController');
+const { upload, handleTrainNewModel ,getModels,classifyImage,getModelClasses,getModelsByUser,getModelDataset} = require('../controllers/modelsController');
 const jwt = require("jsonwebtoken");
 const router = express.Router();
 
@@ -53,4 +53,6 @@ router.get("/models",getModels)
 
 router.post("/classify",upload.single("file"), classifyImage)
 router.get("/classes/:id",getModelClasses)
+router.get("/models/:id",getModelsByUser)
+router.get("/dataset/:id",getModelDataset)
 module.exports = router;

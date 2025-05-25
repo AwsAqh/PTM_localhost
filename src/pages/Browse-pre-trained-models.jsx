@@ -1,5 +1,5 @@
 import React, { useState,useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import Header from '../components/header'
 import "../styles/BrowsePreTrainedModels.css"
 import PreTrainedModelBlock from '../components/pre-trained-model-block'
@@ -12,6 +12,12 @@ const BrowsePreTrainedModels = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [filteredModels, setFilteredModels] = useState([]);
+  const [userName, setUserName] = useState('')
+  const {id} = useParams()
+
+  useEffect(() => { 
+    if(!id) navigate("/browse")
+  }, [id, navigate])
 
   const categories = [
     { value: 'all', label: 'All Categories' },
@@ -43,7 +49,21 @@ const BrowsePreTrainedModels = () => {
   useEffect(() => {
     const handleOnMount = async() => {
       try {
-        const response = await fetch("http://localhost:5000/api/classify/models", {
+        if(id) {
+          const response = await fetch(`http://localhost:5050/api/classify/models/${id}`, {
+            method: "GET",
+            headers: { "Content-type": "application/json" }
+        })
+        if(!response.ok) {
+          console.log("error retrieving data ")
+        }
+        const data = await response.json()
+        setModels(data.models)
+        setFilteredModels(data.models)
+        setUserName(data.userName)
+      }
+      else {
+        const response = await fetch("http://localhost:5050/api/classify/models", {
           method: "GET",
           headers: { "Content-type": "application/json" }
         })
@@ -53,7 +73,9 @@ const BrowsePreTrainedModels = () => {
         const data = await response.json()
         setModels(data)
         setFilteredModels(data)
-      } catch {
+      }
+    
+    } catch {
         console.log("can't fetch models!")
       }
     }
@@ -102,7 +124,8 @@ const BrowsePreTrainedModels = () => {
             </select>
           </div>
         </div>
-      </div>
+      </div> 
+      {id && <div style={{fontSize:"20px",fontWeight:"bold",marginBottom:"20px", color:"#fff"}}>Models by {userName} </div>}
       <div className='models-container'>
         {filteredModels.map((model, index) => 
           <PreTrainedModelBlock 
