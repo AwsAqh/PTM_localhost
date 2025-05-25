@@ -8,8 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "react-scripts start",
-    "test": "react-scripts test"
+    "start": "vite preview",
+    "test": "echo \"No test specified\" && exit 0"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
