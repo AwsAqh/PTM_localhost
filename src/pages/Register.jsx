@@ -17,7 +17,7 @@ const handleFormSubmit=async(e)=>{
     e.preventDefault()    
     console.log("email : ", email.current.value) 
 
-            let url="http://localhost:5000/api/auth/register"
+            let url="http://localhost:5050/api/auth/register"
             let body={name:name.current.value,
                 email:email.current.value,
                 password:password.current.value}
@@ -44,7 +44,7 @@ const handleFormSubmit=async(e)=>{
 
     }catch(err){
 
-        SetError("something went wrong")
+        SetError("something went wrong" , err)
     }
 
 }
