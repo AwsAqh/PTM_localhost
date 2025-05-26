@@ -6,8 +6,9 @@ import { useNavigate } from 'react-router-dom'
 
 const LoginPage = () => {
     const apiUrl = import.meta.env.VITE_API_BACKEND_URL
-    
+    console.log("apiUrl : ",apiUrl)
     const navigate=useNavigate()
+    const [loading,setLoading]=useState(false)
 const [error,setError]=useState("")    
 const formEmail=useRef(null)
 const formPassword=useRef(null)
@@ -21,14 +22,17 @@ const handleFormSubmit=async(e)=>{
         email:formEmail.current.value,
         password:formPassword.current.value}
     
-    try{
+    try{    
 
-
+            console.log("url : ",url)
+            setLoading(true)
             const response=await fetch(url,{
                 method:"POST",
                 headers:{"Content-Type":"application/json"},
                 body:JSON.stringify(body)
             })
+            setLoading(false)
+            console.log("response : ",response)
             const data=await response.json()
             console.log("data : ",data)
             if(response.ok) {
@@ -39,7 +43,9 @@ const handleFormSubmit=async(e)=>{
             else (setError(data.msg)) 
 
     }
-    catch{
+    catch(error){
+        setLoading(false)
+        console.log("error : ",error)
             setError("something went wrong")
     }
 
@@ -70,7 +76,7 @@ const handleFormSubmit=async(e)=>{
                                 <input ref={formPassword}  placeholder="password" type="password" class="form-control" id="exampleInputPassword1"/>
                             </div>
                            
-                            <button type="submit" class="btn btn-primary">Login</button>
+                            <button type="submit" class="btn btn-primary" >{loading ? "Loading..." : "Login"}</button>
                             <div style={{fontSize:"12px", paddingTop:"5px"}}> Don't have an account? <a href='/register'>Register</a> </div>
                     </form>
                     

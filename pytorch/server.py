@@ -3,6 +3,7 @@ import subprocess
 import uuid
 from flask import Flask, request, jsonify
 import json
+import os
 
 import sys
 
@@ -73,4 +74,6 @@ def classify():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+   port = int(os.environ.get("PORT", 8000))       
+   host = "0.0.0.0"                           
+   app.run(host=host, port=port)
