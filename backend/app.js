@@ -52,7 +52,7 @@ process.on('SIGINT', async () => {
   }
 });
 
-app.use("/",(req,res)=>{
+app.get("/",(req,res)=>{
     console.log("welcome to the ptm backend")
 
     res.send("welcome to the ptm backend")
