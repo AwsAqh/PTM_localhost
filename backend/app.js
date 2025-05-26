@@ -3,7 +3,7 @@ const mongoose=require("mongoose")
 const cors =require("cors")
 const authRoutes=require ("./routes/authRoutes")
 const classifyRoutes=require('./routes/classifyRoutes')
-const port=5050
+const port = process.env.PORT || 5050
 const app=express()
 
 app.use(cors());
@@ -73,6 +73,6 @@ app.listen(port, '0.0.0.0', () => {
     console.log('Server running on:');
     console.log(`  Local:   http://localhost:${port}`);
     addresses.forEach(addr => {
-        console.log(`  Network: http://${addr}:5000`);
+        console.log(`  Network: http://${addr}:${port}`);
     });
 });
