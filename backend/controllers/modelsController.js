@@ -8,7 +8,7 @@ const User=require("../models/users");
 
 const storage = multer.memoryStorage();
 
-
+const python_api_url=process.env.Python_API_Server
 const upload = multer({ storage });
 
 const handleTrainNewModel = async (req, res) => {
@@ -62,7 +62,7 @@ const handleTrainNewModel = async (req, res) => {
   try {
     console.log("Trying to train with model name:", modelNameWithUniqueId);
     
-    const response = await axios.post('http://127.0.0.1:5000/train', {
+    const response = await axios.post(`${python_api_url}/train`, {
       modelName: modelNameWithUniqueId,  
       classes: classNames,
       modelArch,
@@ -164,7 +164,7 @@ const classifyImage = async (req, res) => {
       imageUrl = result.secure_url;  
 
       console.log(" the sent arch for python is :",modelArch)
-      axios.post("http://127.0.0.1:5000/classify", {
+      axios.post(`${python_api_url}/classify`, {
         image_url: imageUrl,
         model_path: modelPath,
         classes_length:classesLength,
