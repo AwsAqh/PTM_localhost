@@ -32,3 +32,10 @@ matplotlib
 
 # For scikit-learn metrics (optional, for evaluation)
 scikit-learn
+
+torch
+torchvision
+pillow
+requests
+google-cloud-storage
+python-dotenv
