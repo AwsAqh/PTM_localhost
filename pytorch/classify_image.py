@@ -5,6 +5,19 @@ import requests
 from io import BytesIO
 import sys
 import json
+import io
+from google.cloud import storage
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Handle GCP_KEY_JSON for Render deployments
+if os.getenv("GCP_KEY_JSON"):
+    with open("gcs-key.json", "w") as f:
+        f.write(os.getenv("GCP_KEY_JSON"))
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "gcs-key.json"
 
 def classify_image(image_url, model_path, model_arch, classes_length):
     if model_arch == 'resnet50':
@@ -23,7 +36,17 @@ def classify_image(image_url, model_path, model_arch, classes_length):
         model.fc = torch.nn.Linear(in_features=model.fc.in_features, out_features=classes_length)
 
    
-    model.load_state_dict(torch.load(model_path))
+    if model_path.startswith("gs://"):
+        # Extract bucket and blob from gs:// path
+        _, _, bucket, *blob_parts = model_path.split("/")
+        blob_name = "/".join(blob_parts)
+        client = storage.Client()
+        buffer = io.BytesIO()
+        client.bucket(bucket).blob(blob_name).download_to_file(buffer)
+        buffer.seek(0)
+        model.load_state_dict(torch.load(buffer))
+    else:
+        model.load_state_dict(torch.load(model_path))
     model.eval()  # Set model to evaluation mode
 
     
@@ -51,6 +74,16 @@ def classify_image(image_url, model_path, model_arch, classes_length):
         "confidences": confidences
     }
     print(json.dumps(result))
+
+def load_model_from_gcs(model, model_name, bucket_name="ptm_models"):
+    client = storage.Client()
+    blob = client.bucket(bucket_name).blob(f"models/{model_name}.pth")
+    buffer = io.BytesIO()
+    blob.download_to_file(buffer)
+    buffer.seek(0)
+    model.load_state_dict(torch.load(buffer))
+    print("Model loaded from GCS")
+    return model
 
 if __name__ == '__main__':
     image_url = sys.argv[1]  

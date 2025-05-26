@@ -15,6 +15,18 @@ import uuid
 import tempfile
 from dotenv import load_dotenv
 import time
+import io
+from google.cloud import storage
+import json
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Handle GCP_KEY_JSON for Render deployments
+if os.getenv("GCP_KEY_JSON"):
+    with open("gcs-key.json", "w") as f:
+        f.write(os.getenv("GCP_KEY_JSON"))
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "gcs-key.json"
 
 cloudinary.config(
     cloud_name=os.getenv('CloudName'),
@@ -284,12 +296,16 @@ def train_model(model, dataloaders, criterion, optimizer, target_accuracy=0.95, 
     model.load_state_dict(best_model_wts)
     return model
 
-def save_model_locally(model, file_name):
-    local_path = f"./models/{file_name}"
-    torch.save(model.state_dict(), local_path)
-    return local_path
-
-
+def save_model_to_gcs(model, model_name, bucket_name="ptm_models"):
+    buffer = io.BytesIO()
+    torch.save(model.state_dict(), buffer)
+    buffer.seek(0)
+    client = storage.Client()
+    blob = client.bucket(bucket_name).blob(f"models/{model_name}.pth")
+    blob.upload_from_file(buffer, rewind=True)
+    gcs_path = f"gs://{bucket_name}/models/{model_name}.pth"
+    print(f"Model uploaded to {gcs_path}")
+    return gcs_path
 
 if __name__ == '__main__':
     if len(sys.argv) < 5:
@@ -322,5 +338,5 @@ if __name__ == '__main__':
     # Train until target accuracy is reached or early stopping triggers
     trained_model = train_model(model, train_loader, criterion, optimizer, target_accuracy=0.95, patience=5)
 
-    local_model_path = save_model_locally(trained_model, file_name)
-    print(f"Model saved locally at {local_model_path}")
+    gcs_model_path = save_model_to_gcs(trained_model, file_name.replace('.pth', ''), "ptm_models")
+    print(json.dumps({"modelPath": gcs_model_path}))
