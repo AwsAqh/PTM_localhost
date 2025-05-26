@@ -39,6 +39,7 @@ mongoose.connection.on('disconnected', () => {
   console.log('MongoDB disconnected');
 });
 
+
 // Handle process termination
 process.on('SIGINT', async () => {
   try {
@@ -50,6 +51,12 @@ process.on('SIGINT', async () => {
     process.exit(1);
   }
 });
+
+app.use("/",(req,res)=>{
+    console.log("welcome to the ptm backend")
+
+    res.send("welcome to the ptm backend")
+})
 
 app.use("/api/auth", authRoutes)
 app.use("/api/classify", classifyRoutes)
