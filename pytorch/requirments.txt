@@ -1,0 +1,31 @@
+# Core dependencies
+torch
+torchvision
+
+# Data processing
+numpy
+pillow
+
+# For progress bars (optional, but common)
+tqdm
+
+# For data manipulation (optional, but common)
+pandas
+
+# For image augmentation (optional, but useful)
+albumentations
+
+# For working with YAML configs (optional)
+pyyaml
+
+# For Jupyter notebooks (optional, if you use notebooks)
+jupyter
+
+# For cloud storage (optional, e.g., if you use Google Drive)
+gdown
+
+# For plotting (optional, for visualization)
+matplotlib
+
+# For scikit-learn metrics (optional, for evaluation)
+scikit-learn
