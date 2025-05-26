@@ -4,7 +4,7 @@ import Header from '../components/header';
 import '../styles/model-dataset.css'; // or your main style
 
 const ModelDataset = () => {
-  const apiUrl = import.meta.env.VITE_API_URL
+  const apiUrl = import.meta.env.VITE_API_BACKEND_URL
   const { id } = useParams();
   const [dataset, setDataset] = useState([]);
   const [loading, setLoading] = useState(true);

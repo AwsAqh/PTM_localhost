@@ -8,7 +8,7 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 
 
 const BrowsePreTrainedModels = () => {
-  const apiUrl = import.meta.env.VITE_API_URL
+  const apiUrl = import.meta.env.VITE_API_BACKEND_URL
   const navigate = useNavigate()
   const [models, setModels] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');

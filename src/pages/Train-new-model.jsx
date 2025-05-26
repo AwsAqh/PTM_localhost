@@ -10,7 +10,7 @@ import axios from 'axios';
 
 
 const TrainNewModel = () => {
-  const apiUrl = import.meta.env.VITE_API_URL
+  const apiUrl = import.meta.env.VITE_API_BACKEND_URL
   const navigate=useNavigate()
   const [notification, setNotification] = useState({ 
     show: false,

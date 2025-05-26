@@ -8,7 +8,7 @@ import Notification from '../components/Notification'
 import AuthorInfo from '../components/AuthorInfo'
 
 const ClassifyImage = () => {
-  const apiUrl = import.meta.env.VITE_API_URL
+  const apiUrl = import.meta.env.VITE_API_BACKEND_URL
   const [classes, setClasses] = useState([])
   const [modelName, setModelName] = useState('')
   const [modelDescription, setModelDescription] = useState('')

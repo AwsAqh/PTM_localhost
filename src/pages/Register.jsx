@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 
 
 const RegisterPage = () => {
-    const apiUrl = import.meta.env.VITE_API_URL
+    const apiUrl = import.meta.env.VITE_API_BACKEND_URL
     const navigate=useNavigate()
 const [error,SetError]=useState("")
 const name=useRef(null)    

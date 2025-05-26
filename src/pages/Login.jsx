@@ -5,7 +5,8 @@ import "../styles/login.css"
 import { useNavigate } from 'react-router-dom'
 
 const LoginPage = () => {
-    const apiUrl = import.meta.env.VITE_API_URL
+    const apiUrl = import.meta.env.VITE_API_BACKEND_URL
+    console.log(apiUrl)
     const navigate=useNavigate()
 const [error,setError]=useState("")    
 const formEmail=useRef(null)
