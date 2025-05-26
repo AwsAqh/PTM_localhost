@@ -4,6 +4,7 @@ import Header from '../components/header';
 import '../styles/model-dataset.css'; // or your main style
 
 const ModelDataset = () => {
+  const apiUrl = import.meta.env.VITE_API_URL
   const { id } = useParams();
   const [dataset, setDataset] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,7 +19,7 @@ const ModelDataset = () => {
         // For public images, you can use the "list" feature if enabled, or fetch by prefix.
         // Here is a public fetch by prefix (if your images are public):
         const res = await fetch(
-         `http://localhost:5050/api/classify/dataset/${id}`,
+         `${apiUrl}/api/classify/dataset/${id}`,
           {
             method: 'GET',
             headers: {

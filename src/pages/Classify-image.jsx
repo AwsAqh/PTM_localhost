@@ -8,6 +8,7 @@ import Notification from '../components/Notification'
 import AuthorInfo from '../components/AuthorInfo'
 
 const ClassifyImage = () => {
+  const apiUrl = import.meta.env.VITE_API_URL
   const [classes, setClasses] = useState([])
   const [modelName, setModelName] = useState('')
   const [modelDescription, setModelDescription] = useState('')
@@ -43,7 +44,7 @@ const ClassifyImage = () => {
   useEffect(() => {
     const getModelClasses = async() => {
       try {
-        const response = await fetch(`http://localhost:5050/api/classify/classes/${id}`,
+        const response = await fetch(`${apiUrl}/api/classify/classes/${id}`,
           {
             method: 'GET',
             headers: {'Content-type': 'application/json'}
@@ -109,7 +110,7 @@ const ClassifyImage = () => {
       formData.append("file", file)
       formData.append("modelId", id)
 
-      const response = await fetch("http://localhost:5050/api/classify/classify", {
+      const response = await fetch(`${apiUrl}/api/classify/classify`, {
         method: "POST",
         body: formData
       })

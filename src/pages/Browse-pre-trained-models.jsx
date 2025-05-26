@@ -6,7 +6,9 @@ import PreTrainedModelBlock from '../components/pre-trained-model-block'
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
 
+
 const BrowsePreTrainedModels = () => {
+  const apiUrl = import.meta.env.VITE_API_URL
   const navigate = useNavigate()
   const [models, setModels] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -50,7 +52,7 @@ const BrowsePreTrainedModels = () => {
     const handleOnMount = async() => {
       try {
         if(id) {
-          const response = await fetch(`http://localhost:5050/api/classify/models/${id}`, {
+          const response = await fetch(`${apiUrl}/api/classify/models/${id}`, {
             method: "GET",
             headers: { "Content-type": "application/json" }
         })
@@ -63,7 +65,7 @@ const BrowsePreTrainedModels = () => {
         setUserName(data.userName)
       }
       else {
-        const response = await fetch("http://localhost:5050/api/classify/models", {
+        const response = await fetch(`${apiUrl}/api/classify/models`, {
           method: "GET",
           headers: { "Content-type": "application/json" }
         })

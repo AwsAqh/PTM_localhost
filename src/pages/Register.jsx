@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 
 
 const RegisterPage = () => {
+    const apiUrl = import.meta.env.VITE_API_URL
     const navigate=useNavigate()
 const [error,SetError]=useState("")
 const name=useRef(null)    
@@ -17,7 +18,7 @@ const handleFormSubmit=async(e)=>{
     e.preventDefault()    
     console.log("email : ", email.current.value) 
 
-            let url="http://localhost:5050/api/auth/register"
+            let url=`${apiUrl}/api/auth/register`
             let body={name:name.current.value,
                 email:email.current.value,
                 password:password.current.value}

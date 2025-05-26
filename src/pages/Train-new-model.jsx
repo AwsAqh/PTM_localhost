@@ -10,7 +10,7 @@ import axios from 'axios';
 
 
 const TrainNewModel = () => {
-
+  const apiUrl = import.meta.env.VITE_API_URL
   const navigate=useNavigate()
   const [notification, setNotification] = useState({ 
     show: false,
@@ -161,6 +161,7 @@ const TrainNewModel = () => {
             formData.append("category",modelCategory.current.value)
             formData.append("userId",userId)  
             
+            
            
             classes.forEach((classItem, index) => {
               formData.append(`class_name_${index}`, names[index]); // Add class name dynamically
@@ -180,7 +181,7 @@ const TrainNewModel = () => {
               actions: []
             });
           
-            axios.post('http://localhost:5050/api/classify/train', formData, {
+            axios.post(`${apiUrl}/api/classify/train`, formData, {
               headers: {
                 'Content-Type': 'multipart/form-data', 
                 "x-auth-token":localStorage.getItem("token")

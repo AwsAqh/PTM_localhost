@@ -5,6 +5,7 @@ import "../styles/login.css"
 import { useNavigate } from 'react-router-dom'
 
 const LoginPage = () => {
+    const apiUrl = import.meta.env.VITE_API_URL
     const navigate=useNavigate()
 const [error,setError]=useState("")    
 const formEmail=useRef(null)
@@ -14,7 +15,7 @@ const handleFormSubmit=async(e)=>{
     e.preventDefault()    
     console.log("email : ", formEmail.current.value) 
 
-    let url ="http://localhost:5050/api/auth/login"
+    let url =`${apiUrl}/api/auth/login`
     let body={
         email:formEmail.current.value,
         password:formPassword.current.value}
