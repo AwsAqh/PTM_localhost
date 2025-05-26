@@ -11,6 +11,22 @@ const storage = multer.memoryStorage();
 const python_api_url=process.env.Python_API_Server
 const upload = multer({ storage });
 
+const uploadToCloudinary = (file, modelFolder) => {
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader.upload_stream({
+      folder: modelFolder,
+      public_id: `${Date.now()}_${file.originalname.replace(/\s+/g, '_')}`,
+    }, (err, result) => {
+      if (err) {
+        reject(err);
+      } else {
+        console.log('File uploaded to Cloudinary:', result.secure_url);
+        resolve(result);
+      }
+    }).end(file.buffer);
+  });
+};
+
 const handleTrainNewModel = async (req, res) => {
   if (!req.files || req.files.length === 0) {
     return res.status(400).json({ message: 'No files uploaded.' });
@@ -18,14 +34,13 @@ const handleTrainNewModel = async (req, res) => {
 
   const classesCount = parseInt(req.body.classesCount, 10);
   let classNames = [];
-  const modelArch=req.body.modelArch
-  const modelCategory=req.body.category
-  const uniqueModelId =  uuid.v4().slice(0, 8);  
+  const modelArch = req.body.modelArch;
+  const modelCategory = req.body.category;
+  const uniqueModelId = uuid.v4().slice(0, 8);
+  const modelNameWithUniqueId = `${req.body.modelName}_${uniqueModelId}`;
 
-  
-  const modelNameWithUniqueId = `${req.body.modelName}_${uniqueModelId}`;  
-
-  // Upload images to Cloudinary and process the files
+  // Collect all upload promises
+  let uploadPromises = [];
   for (let i = 0; i < classesCount; i++) {
     const className = req.body[`class_name_${i}`];
     if (!className) {
@@ -33,61 +48,49 @@ const handleTrainNewModel = async (req, res) => {
     }
     classNames.push(className);
 
-    // Filter files that belong to this class
     const classFiles = req.files.filter(file => file.fieldname === `class_dataset_${i}`);
-
     if (classFiles && classFiles.length > 0) {
       classFiles.forEach((file) => {
-        // Create a unique folder for each model using model name + unique model ID
         const modelFolder = `dataset/${modelNameWithUniqueId}/${className}`;
-        
-      
-        cloudinary.uploader.upload_stream({
-          folder: modelFolder,  
-          public_id: `${Date.now()}_${file.originalname.replace(/\s+/g, '_')}`,
-        }, (err, result) => {
-          if (err) {
-            return res.status(500).json({ message: 'Error uploading to Cloudinary', error: err });
-          } else {
-            console.log('File uploaded to Cloudinary:', result.secure_url);
-          }
-        }).end(file.buffer); // Upload file buffer to Cloudinary
+        uploadPromises.push(uploadToCloudinary(file, modelFolder));
       });
     } else {
       console.log(`No files for class_${i}`);
     }
   }
 
- 
   try {
+    // Wait for all uploads to finish
+    await Promise.all(uploadPromises);
+
+    // Now proceed with training
     console.log("Trying to train with model name:", modelNameWithUniqueId);
-    
     const response = await axios.post(`${python_api_url}/train`, {
-      modelName: modelNameWithUniqueId,  
+      modelName: modelNameWithUniqueId,
       classes: classNames,
       modelArch,
     });
-    const modelPath = response.data.modelPath;  
-    
+    const modelPath = response.data.modelPath;
+
     console.log('Training Response:', response.data);
-    
     console.log("Model path:", modelPath);
+
     try {
-      console.log(" id id :" , req.userId)
+      console.log(" id id :", req.userId);
       const newModel = new Model({
-          name: req.body.modelName,
-          modelNameOnCloud: modelNameWithUniqueId,
-          modelDescription: req.body.modelDescription,
-          path: "./models/" + modelPath,
-          classes: classNames,
-          modelArcheticture: modelArch,
-          modelCategory: modelCategory,
-          createdBy: req.userId
+        name: req.body.modelName,
+        modelNameOnCloud: modelNameWithUniqueId,
+        modelDescription: req.body.modelDescription,
+        path: modelPath, // Use the path as returned by the Python script
+        classes: classNames,
+        modelArcheticture: modelArch,
+        modelCategory: modelCategory,
+        createdBy: req.userId
       });
       const savedModel = await newModel.save();
       res.json({
         message: 'Model trained successfully!',
-        modelName: modelNameWithUniqueId, 
+        modelName: modelNameWithUniqueId,
         classNames: classNames,
         modelPath: modelPath,
         modelId: savedModel._id
@@ -97,8 +100,8 @@ const handleTrainNewModel = async (req, res) => {
       res.status(500).json({ message: 'Error saving model document', error: error.message });
     }
   } catch (error) {
-    console.error('Error triggering training:', error);
-    res.status(500).json({ message: 'Error starting model training', error: error.message });
+    console.error('Error uploading to Cloudinary or triggering training:', error);
+    res.status(500).json({ message: 'Error uploading to Cloudinary or starting model training', error: error.message });
   }
 };
 
