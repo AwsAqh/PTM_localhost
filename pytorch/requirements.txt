@@ -2,6 +2,9 @@
 torch
 torchvision
 
+Flask
+Flask-Cors
+
 # Data processing
 numpy
 pillow
