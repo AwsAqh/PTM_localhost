@@ -22,9 +22,11 @@
 }
 
 
-.page-content{
+.classify-page-content{
+
     display: flex;
     max-width: 70%;
+    
 }
 
 

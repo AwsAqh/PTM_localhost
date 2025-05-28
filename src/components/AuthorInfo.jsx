@@ -3,7 +3,10 @@ import Person2Icon from '@mui/icons-material/Person2';
 import "../styles/AuthorInfo.css"
 import Button from './Button';
 import { useNavigate } from 'react-router-dom';
-const AuthorInfo = ({createdBy, authorEmail, authorName}) => {
+const AuthorInfo = ({createdBy, authorEmail, authorName, modelId}) => {
+  console.log("author name : ",authorName)
+  console.log("author email : ",authorEmail)
+  console.log("created by : ",createdBy)
   const navigate=useNavigate()
   return (
     <div className="model-creator-area">
@@ -19,7 +22,7 @@ const AuthorInfo = ({createdBy, authorEmail, authorName}) => {
 
                 <ul>
                     <li onClick={()=>navigate(`/browse/${createdBy}`)}>View all models</li>
-                    <li>Browse Dataset</li>
+                    <li onClick={()=>navigate(`/dataset/${modelId}`)}>Browse Dataset</li>
                     <li>Other otion</li>
                    
                 </ul>

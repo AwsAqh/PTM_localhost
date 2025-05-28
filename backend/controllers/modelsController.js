@@ -5,11 +5,14 @@ const axios = require('axios');
 const uuid = require('uuid'); 
 const Model=require("../models/models");
 const User=require("../models/users");
-
+const python_api_url="http://127.0.0.1:5000"
 const storage = multer.memoryStorage();
+const mongoose = require('mongoose');
 
-const python_api_url=process.env.Python_API_Server
 const upload = multer({ storage });
+
+
+
 
 const uploadToCloudinary = (file, modelFolder) => {
   return new Promise((resolve, reject) => {
@@ -71,17 +74,20 @@ const handleTrainNewModel = async (req, res) => {
       modelArch,
     });
     const modelPath = response.data.modelPath;
+    const cloudPath = response.data.cloudPath;
 
     console.log('Training Response:', response.data);
     console.log("Model path:", modelPath);
+    console.log("Cloud path:", cloudPath);
 
     try {
-      console.log(" id id :", req.userId);
+      console.log("User ID:", req.userId);
       const newModel = new Model({
         name: req.body.modelName,
         modelNameOnCloud: modelNameWithUniqueId,
         modelDescription: req.body.modelDescription,
-        path: modelPath, // Use the path as returned by the Python script
+        path: "./models/" + modelPath,
+        cloudPath: cloudPath,
         classes: classNames,
         modelArcheticture: modelArch,
         modelCategory: modelCategory,
@@ -93,6 +99,7 @@ const handleTrainNewModel = async (req, res) => {
         modelName: modelNameWithUniqueId,
         classNames: classNames,
         modelPath: modelPath,
+        cloudPath: cloudPath,
         modelId: savedModel._id
       });
     } catch (error) {
@@ -100,8 +107,18 @@ const handleTrainNewModel = async (req, res) => {
       res.status(500).json({ message: 'Error saving model document', error: error.message });
     }
   } catch (error) {
-    console.error('Error uploading to Cloudinary or triggering training:', error);
-    res.status(500).json({ message: 'Error uploading to Cloudinary or starting model training', error: error.message });
+    console.error('Error in training process:', error);
+    if (error.response) {
+      console.error('Python server response:', error.response.data);
+      return res.status(error.response.status).json({
+        message: 'Error from Python server',
+        error: error.response.data
+      });
+    }
+    return res.status(500).json({
+      message: 'Error in training process',
+      error: error.message
+    });
   }
 };
 
@@ -130,76 +147,74 @@ const classifyImage = async (req, res) => {
   console.log("Model ID:", req.body.modelId);
 
   let cloudModelName = "";
-  let modelPath = "";
+  let localPath = "";
+  let cloudPath = "";
   let imageUrl = "";
-  let classesLength=0
-  let model=null
-  let modelArch=""
+  let classesLength = 0;
+  let model = null;
+  let modelArch = "";
 
   try {
-    
-     model = await Model.findById(req.body.modelId, "modelNameOnCloud path classes modelArcheticture");
+    model = await Model.findById(req.body.modelId, "modelNameOnCloud path cloudPath classes modelArcheticture");
     cloudModelName = model.modelNameOnCloud;
-    modelPath = model.path;
-    classesLength=model.classes.length
-    modelArch=model.modelArcheticture
-    console.log("classes length in node.js : ",classesLength)
-
+    localPath = model.path;
+    cloudPath = model.cloudPath;
+    classesLength = model.classes.length;
+    modelArch = model.modelArcheticture;
+    console.log("Classes length in node.js:", classesLength);
+    console.log("Local path:", localPath);
+    console.log("Cloud path:", cloudPath);
   } catch (err) {
     console.log("Error getting model from database", err);
     return res.status(500).json({ msg: "Error getting model from database", error: err.message });
   }
 
-
-
   try {
-    
-    const uploadStream = cloudinary.uploader.upload_stream({
-      folder: `classify/${cloudModelName}`,
-      public_id: `${Date.now()}_${file.originalname.replace(/\s+/g, '_')}`,
-    }, (err, result) => {
-      if (err) {
-        console.log("Error uploading to Cloudinary", err);
-        return res.status(500).json({ message: 'Error uploading to Cloudinary', error: err });
-      }
-
-      console.log('File uploaded to Cloudinary:', result.secure_url);
-      imageUrl = result.secure_url;  
-
-      console.log(" the sent arch for python is :",modelArch)
-      axios.post(`${python_api_url}/classify`, {
-        image_url: imageUrl,
-        model_path: modelPath,
-        classes_length:classesLength,
-        model_arch:modelArch
-      })
-        .then(response => {
-          const result = response.data.predicted_class;
-          const confidences = response.data.confidences;
-          console.log("Classification result:", result);
-          console.log("Confidences:", confidences);
-          
-          res.status(200).json({ 
-            result: model.classes[result],
-            confidences: confidences
-          });
-        })
-        .catch(err => {
-          if (err.response) {
-            console.error("status:", err.response.status);
-            console.error("body:", err.response.data);
-          } else {
-            console.error(err);
-          }
-          res.status(500).json({ msg: "Error classifying image.", error: err.response?.data });
-        });
+    const uploadResult = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream({
+        folder: `classify/${cloudModelName}`,
+        public_id: `${Date.now()}_${file.originalname.replace(/\s+/g, '_')}`,
+      }, (err, result) => {
+        if (err) reject(err);
+        else resolve(result);
+      });
+      uploadStream.end(file.buffer);
     });
 
-    uploadStream.end(file.buffer);
+    console.log('File uploaded to Cloudinary:', uploadResult.secure_url);
+    imageUrl = uploadResult.secure_url;
 
+    console.log("Sending classification request to Python server...");
+    const response = await axios.post(`${python_api_url}/classify`, {
+      image_url: imageUrl,
+      local_path: localPath,
+      cloud_path: cloudPath,
+      classes_length: classesLength,
+      model_arch: modelArch
+    });
+
+    const result = response.data.predicted_class;
+    const confidences = response.data.confidences;
+    console.log("Classification result:", result);
+    console.log("Confidences:", confidences);
+
+    res.status(200).json({
+      result: model.classes[result],
+      confidences: confidences
+    });
   } catch (err) {
-    console.log("Error saving input image", err);
-    res.status(500).json({ msg: "Error saving input image.", error: err.message });
+    console.error("Error in classification:", err);
+    if (err.response) {
+      console.error("Python server response:", err.response.data);
+      return res.status(err.response.status).json({
+        msg: "Error classifying image",
+        error: err.response.data
+      });
+    }
+    res.status(500).json({
+      msg: "Error in classification process",
+      error: err.message
+    });
   }
 };
 
@@ -224,27 +239,35 @@ const {id}=req.params
   }
 }
 
-const getModelsByUser=async(req,res)=>{
-  const {id}=req.params
-  try{
-    const user=await User.findById(id,"name")
-    const models=await Model.find({createdBy:id})
-    if(!models){
-      return res.status(404).json({msg:"no models found"})
-    }
-  
-    res.status(200).json({models:models,userName:user.name})
+const getModelsByUser = async (req, res) => {
+  const userId = req.params.id;
+
+  // Validate ObjectId
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ models: [], error: 'Invalid user ID format.' });
   }
-  catch(err){
-    console.log("error retrieving models from database : ",err)
-    res.status(500).json({msg:"error happend while retrieving models from database"})
+
+  try {
+    const user = await User.findById(userId);
+    console.log("user : ",user)
+    if (!user) {
+      return res.status(400).json({ models: [], error: 'User not found.' });
+    }
+    const models = await Model.find({ createdBy: userId });
+    if (!models || models.length === 0) {
+      return res.status(200).json({ models: [], error: "No models found for this user." });
+    }
+    res.status(200).json({ models: models, userName: user.name });
+  } catch (err) {
+    console.log("error retrieving models from database : ", err);
+    res.status(500).json({ models: [], error: "Error happened while retrieving models from database" });
   }
 }
 
 const getModelDataset = async (req, res) => {
   const { id } = req.params;
   try {
-    const model=await Model.findById(id,"modelNameOnCloud classes")
+    const model=await Model.findById(id,"name modelNameOnCloud classes")
     const classes=model.classes
     const modelNameOnCloud=model.modelNameOnCloud
     const dataset = [];
@@ -262,7 +285,7 @@ const getModelDataset = async (req, res) => {
         images
       });
     }
-    res.status(200).json(dataset);
+    res.status(200).json({dataset:dataset,modelName:model.name});
   } catch (err) {
     console.log("error retrieving dataset from database : ", err);
     res.status(500).json({ msg: "error happend while retrieving dataset from database" });

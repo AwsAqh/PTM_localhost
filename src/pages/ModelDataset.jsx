@@ -10,14 +10,14 @@ const ModelDataset = () => {
   const [loading, setLoading] = useState(true);
   const [openFolders, setOpenFolders] = useState({});
   const [modalImage, setModalImage] = useState(null);
+  const [modelName, setModelName] = useState('');
 
+  //fetgch dataset on mount
   useEffect(() => {
     const fetchDataset = async () => {
       setLoading(true);
       try {
-        // You may need a backend endpoint to securely call Cloudinary's Admin API.
-        // For public images, you can use the "list" feature if enabled, or fetch by prefix.
-        // Here is a public fetch by prefix (if your images are public):
+     
         const res = await fetch(
          `${apiUrl}/api/classify/dataset/${id}`,
           {
@@ -29,7 +29,8 @@ const ModelDataset = () => {
         );
      
         const data = await res.json();
-        setDataset(data); // data is an array of { className, images }
+        setDataset(data.dataset);
+        setModelName(data.modelName);
         console.log(data)
       } catch (err) {
         setDataset([]);
@@ -58,7 +59,7 @@ const ModelDataset = () => {
     <div className="models-page-container">
       <Header />
       <div className="page-content">
-        <h2>Dataset for Model: {id}</h2>
+        <h2 style={{textAlign:'center',color:'#fff'}}>Dataset for Model: {modelName}</h2>
         {loading ? (
           <div>Loading dataset...</div>
         ) : (

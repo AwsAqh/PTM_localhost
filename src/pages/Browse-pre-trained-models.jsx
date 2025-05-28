@@ -15,8 +15,9 @@ const BrowsePreTrainedModels = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [filteredModels, setFilteredModels] = useState([]);
   const [userName, setUserName] = useState('')
+  const [error, setError] = useState(null)
   const {id} = useParams()
-
+  console.log("id : ",id)
   useEffect(() => { 
     if(!id) navigate("/browse")
   }, [id, navigate])
@@ -56,12 +57,16 @@ const BrowsePreTrainedModels = () => {
             method: "GET",
             headers: { "Content-type": "application/json" }
         })
+        const data = await response.json()
+      
+        console.log("data : ",data)
         if(!response.ok) {
           console.log("error retrieving data ")
+          setError(data.error)
         }
-        const data = await response.json()
-        setModels(data.models)
-        setFilteredModels(data.models)
+        
+        setModels(data.models || [])
+        setFilteredModels(data.models || [])
         setUserName(data.userName)
       }
       else {
@@ -69,16 +74,19 @@ const BrowsePreTrainedModels = () => {
           method: "GET",
           headers: { "Content-type": "application/json" }
         })
+        const data = await response.json()
         if(!response.ok) {
           console.log("error retrieving data ")
+          setError(data.error)
         }
-        const data = await response.json()
-        setModels(data)
-        setFilteredModels(data)
+        
+        setModels(data || [])
+        setFilteredModels(data || [])
       }
     
-    } catch {
+    } catch (err) {
         console.log("can't fetch models!")
+        setError(err.error)
       }
     }
     handleOnMount()
@@ -127,7 +135,9 @@ const BrowsePreTrainedModels = () => {
           </div>
         </div>
       </div> 
-      {id && <div style={{fontSize:"20px",fontWeight:"bold",marginBottom:"20px", color:"#fff"}}>Models by {userName} </div>}
+      {id && !error && <div style={{fontSize:"20px",fontWeight:"bold",marginBottom:"20px", color:"#fff"}}>Models by {userName} </div>}
+      {error && <div style={{fontSize:"20px",fontWeight:"bold",marginBottom:"20px", color:"#fff"}}>{error}</div>}
+      {models.length === 0 && !error && <div>No models found.</div>}
       <div className='models-container'>
         {filteredModels.map((model, index) => 
           <PreTrainedModelBlock 

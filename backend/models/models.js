@@ -7,6 +7,7 @@ const  modelSchema=new mongoose.Schema({
     modelNameOnCloud:{type:String ,require:true },
     modelDescription:{type:String},
     path:{type:String,require:true},
+    cloudPath:{type:String,require:true},
     classes:{type:[String],require:true},
     modelArcheticture:{type:String},
     modelCategory:{type:String},

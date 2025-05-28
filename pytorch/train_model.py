@@ -137,7 +137,7 @@ def setup_model(model_arch, num_classes):
 
     return model.to(device)
 
-def train_model(model, dataloaders, criterion, optimizer, target_accuracy=0.95, patience=5):
+def train_model(model, dataset, criterion, optimizer, target_accuracy=0.95, patience=5):
     best_model_wts = model.state_dict()
     best_acc = 0.0
     no_improve_epochs = 0
@@ -161,13 +161,13 @@ def train_model(model, dataloaders, criterion, optimizer, target_accuracy=0.95, 
     start_time = time.time()
     
     # Split dataset into train and validation
-    train_size = int(0.8 * len(dataloaders.dataset))
-    val_size = len(dataloaders.dataset) - train_size
-    train_dataset, val_dataset = torch.utils.data.random_split(dataloaders.dataset, [train_size, val_size])
+    train_size = int(0.8 * len(dataset))
+    val_size = len(dataset) - train_size
+    train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
     
     # Create datasets with appropriate transforms
-    train_dataset = CloudinaryDataset(dataloaders.dataset.image_urls, transform=train_transform, is_training=True)
-    val_dataset = CloudinaryDataset(dataloaders.dataset.image_urls, transform=val_transform, is_training=False)
+    train_dataset = CloudinaryDataset(dataset.image_urls, transform=train_transform, is_training=True)
+    val_dataset = CloudinaryDataset(dataset.image_urls, transform=val_transform, is_training=False)
     
     # Dynamic batch size based on dataset size
     total_samples = len(train_dataset)
@@ -215,14 +215,14 @@ def train_model(model, dataloaders, criterion, optimizer, target_accuracy=0.95, 
             running_loss += loss.item() * inputs.size(0)
             running_corrects += torch.sum(preds == labels.data)
 
-        train_loss = running_loss / len(train_loader.dataset)
-        train_acc = running_corrects.double() / len(train_loader.dataset)
+        train_loss = running_loss / len(train_dataset)
+        train_acc = running_corrects.double() / len(train_dataset)
 
         # Validation phase
         model.eval()
         val_loss = 0.0
         val_corrects = 0
-        num_classes = len(dataloaders.dataset.image_urls)
+        num_classes = len(dataset.image_urls)
         class_corrects = [0] * num_classes
         class_totals = [0] * num_classes
 
@@ -236,7 +236,7 @@ def train_model(model, dataloaders, criterion, optimizer, target_accuracy=0.95, 
                 val_loss += loss.item() * inputs.size(0)
                 val_corrects += torch.sum(preds == labels.data)
 
-              
+                # Track per-class accuracy
                 for i in range(len(labels)):
                     label = labels[i]
                     pred = preds[i]
@@ -244,8 +244,8 @@ def train_model(model, dataloaders, criterion, optimizer, target_accuracy=0.95, 
                         class_corrects[label] += 1
                     class_totals[label] += 1
 
-        val_loss = val_loss / len(val_loader.dataset)
-        val_acc = val_corrects.double() / len(val_loader.dataset)
+        val_loss = val_loss / len(val_dataset)
+        val_acc = val_corrects.double() / len(val_dataset)
 
         print(f'Train Loss: {train_loss:.4f} Acc: {train_acc:.4f}')
         print(f'Val Loss: {val_loss:.4f} Acc: {val_acc:.4f}')
@@ -253,10 +253,10 @@ def train_model(model, dataloaders, criterion, optimizer, target_accuracy=0.95, 
         
         # Print per-class accuracy
         print('\nPer-class accuracy:')
-        for i in range(len(class_corrects)):
+        for i, class_name in enumerate(dataset.image_urls.keys()):
             if class_totals[i] > 0:
                 class_acc = class_corrects[i] / class_totals[i]
-                print(f'Class {i}: {class_acc:.4f}')
+                print(f'Class {class_name}: {class_acc:.4f}')
 
         # Update learning rate based on validation accuracy
         old_lr = optimizer.param_groups[0]['lr']
@@ -296,47 +296,131 @@ def train_model(model, dataloaders, criterion, optimizer, target_accuracy=0.95, 
     model.load_state_dict(best_model_wts)
     return model
 
-def save_model_to_gcs(model, model_name, bucket_name="ptm_models"):
-    buffer = io.BytesIO()
-    torch.save(model.state_dict(), buffer)
-    buffer.seek(0)
-    client = storage.Client()
-    blob = client.bucket(bucket_name).blob(f"models/{model_name}.pth")
-    blob.upload_from_file(buffer, rewind=True)
-    gcs_path = f"gs://{bucket_name}/models/{model_name}.pth"
-    print(f"Model uploaded to {gcs_path}")
-    return gcs_path
+def save_model(model, model_name, output_file):
+    """Save model locally and to Google Cloud Storage"""
+    try:
+        # Create models directory if it doesn't exist
+        models_dir = os.path.join(os.path.dirname(__file__), 'models')
+        os.makedirs(models_dir, exist_ok=True)
+        
+        # Construct the full path for the local model file
+        local_model_path = os.path.join(models_dir, os.path.basename(output_file))
+        
+        print(f'Saving model locally to {local_model_path}...')
+        torch.save(model.state_dict(), local_model_path)
+        print('Model saved locally successfully!')
+
+        # Save to Google Cloud Storage
+        print('Uploading model to Google Cloud Storage...')
+        client = storage.Client()
+        bucket = client.bucket('ptm_models')
+        cloud_blob_name = f'models/{os.path.basename(output_file)}'
+        blob = bucket.blob(cloud_blob_name)
+        
+        # Upload the file
+        blob.upload_from_filename(local_model_path)
+        cloud_path = f'gs://ptm_models/{cloud_blob_name}'
+        print(f'Model uploaded to {cloud_path} successfully!')
+        
+        return {
+            'local_path': local_model_path,
+            'cloud_path': cloud_path
+        }
+    except Exception as e:
+        print(f'Error saving model: {str(e)}')
+        raise
 
 if __name__ == '__main__':
-    if len(sys.argv) < 5:
-        print("Error: Model name, classes, model architecture, and file path arguments are required")
+    print('\n=== STARTING TRAINING SCRIPT ===')
+    print('Arguments received:', sys.argv)
+    
+    if len(sys.argv) != 5:
+        print('ERROR: Invalid number of arguments')
+        print('Usage: python train_model.py <model_name> <classes> <model_arch> <output_file>')
+        print('Note: Models will be saved locally in pytorch/models/ and in Google Cloud Storage')
         sys.exit(1)
-
-    model_name = sys.argv[1]
-    classes = eval(sys.argv[2])  
-    model_arch = sys.argv[3]  
-    file_name = sys.argv[4]  
-
-    print(f"Training model: {model_name}")
-    print(f"Classes: {classes}")
-    print(f"Model Architecture: {model_arch}")
-
-    num_classes = len(classes)
-
-    
-    image_urls = get_image_urls_from_cloudinary(model_name, classes)
-
-    dataset = CloudinaryDataset(image_urls, transform=train_transform)
-    train_loader = DataLoader(dataset, batch_size=32, shuffle=True)
-
-    
-    model = setup_model(model_arch, num_classes)
-
-    criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
-
-    # Train until target accuracy is reached or early stopping triggers
-    trained_model = train_model(model, train_loader, criterion, optimizer, target_accuracy=0.95, patience=5)
-
-    gcs_model_path = save_model_to_gcs(trained_model, file_name.replace('.pth', ''), "ptm_models")
-    print(json.dumps({"modelPath": gcs_model_path}))
+        
+    try:
+        model_name = sys.argv[1]
+        classes = eval(sys.argv[2])  # Convert string representation of list back to list
+        model_arch = sys.argv[3]
+        output_file = sys.argv[4]  # This will be just the filename, e.g. "model.pth"
+        
+        print('\n=== CONFIGURATION ===')
+        print(f'Model name: {model_name}')
+        print(f'Classes: {classes}')
+        print(f'Model architecture: {model_arch}')
+        print(f'Output file: {output_file} (will be saved in pytorch/models/)')
+        print(f'Device: {device}')
+        
+        # Get image URLs from Cloudinary
+        print('\n=== FETCHING IMAGES FROM CLOUDINARY ===')
+        try:
+            image_urls = get_image_urls_from_cloudinary(model_name, classes)
+            print('Successfully fetched images from Cloudinary')
+            for class_name, urls in image_urls.items():
+                print(f'Class {class_name}: {len(urls)} images')
+        except Exception as e:
+            print(f'ERROR fetching images from Cloudinary: {str(e)}')
+            raise
+        
+        # Create dataset
+        print('\n=== CREATING DATASET ===')
+        try:
+            dataset = CloudinaryDataset(image_urls, transform=train_transform)
+            print(f'Dataset created with {len(dataset)} total images')
+        except Exception as e:
+            print(f'ERROR creating dataset: {str(e)}')
+            raise
+        
+        # Setup model
+        print('\n=== SETTING UP MODEL ===')
+        try:
+            model = setup_model(model_arch, len(classes))
+            print(f'Model {model_arch} created successfully')
+            print(f'Model moved to device: {next(model.parameters()).device}')
+        except Exception as e:
+            print(f'ERROR setting up model: {str(e)}')
+            raise
+        
+        # Setup training
+        print('\n=== SETTING UP TRAINING ===')
+        try:
+            criterion = nn.CrossEntropyLoss()
+            optimizer = optim.Adam(model.parameters(), lr=0.001)
+            print('Loss function and optimizer created')
+        except Exception as e:
+            print(f'ERROR setting up training: {str(e)}')
+            raise
+        
+        # Train model
+        print('\n=== STARTING TRAINING PROCESS ===')
+        try:
+            model = train_model(model, dataset, criterion, optimizer)
+            print('Training completed successfully')
+        except Exception as e:
+            print(f'ERROR during training: {str(e)}')
+            raise
+        
+        # Save model locally and to cloud
+        print('\n=== SAVING MODEL ===')
+        try:
+            model_paths = save_model(model, model_name, output_file)
+            print(f'Model saved locally to: {model_paths["local_path"]}')
+            print(f'Model saved to cloud at: {model_paths["cloud_path"]}')
+            
+            # Write the cloud path to a temporary file for the server to read
+            with open('model_cloud_path.txt', 'w') as f:
+                f.write(model_paths['cloud_path'])
+        except Exception as e:
+            print(f'ERROR saving model: {str(e)}')
+            raise
+        
+        print('\n=== TRAINING COMPLETED SUCCESSFULLY ===')
+        
+    except Exception as e:
+        print(f'\n!!! FATAL ERROR: {str(e)}')
+        print('Stack trace:')
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)

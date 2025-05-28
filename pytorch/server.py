@@ -21,14 +21,25 @@ def train_model():
         return jsonify({'error': 'Classes are required and must be a list'}), 400
 
     try:
-     
         file_name = f"{model_name}.pth" 
-
         
-        subprocess.run(['python3', 'train_model.py', model_name, str(classes),model_arch, file_name], check=True)
+        # Run the training script
+        subprocess.run(['python3', 'train_model.py', model_name, str(classes), model_arch, file_name], check=True)
 
+        # Read the cloud path from the temporary file
+        cloud_path = None
+        try:
+            with open('model_cloud_path.txt', 'r') as f:
+                cloud_path = f.read().strip()
+            # Clean up the temporary file
+            os.remove('model_cloud_path.txt')
+        except Exception as e:
+            print(f"Error reading cloud path: {str(e)}")
         
-        return jsonify({'modelPath': file_name}), 200
+        return jsonify({
+            'modelPath': file_name,
+            'cloudPath': cloud_path
+        }), 200
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -36,44 +47,72 @@ def train_model():
 
 @app.route('/classify', methods=['POST'])
 def classify():
-    
-    data = request.get_json()
-    image_url = data.get('image_url')
-    model_path = data.get('model_path')
-    classes_length = data.get('classes_length')
-    model_arch=data.get('model_arch')
-    print(f'data recieved : {image_url} {model_arch} {model_path} {classes_length}')
-    if not image_url or not model_path or not classes_length:
-        return jsonify({"error": "image_url, model_path, and classes_length are required"}), 400
-
     try:
-       
+        data = request.json
+        print("Received data:", data)  # Log received data
+        
+        image_url = data.get('image_url')
+        local_path = data.get('local_path')
+        cloud_path = data.get('cloud_path')
+        model_arch = data.get('model_arch')
+        classes_length = data.get('classes_length')
+
+        # Validate and log each parameter
+        print(f"Parameters received:")
+        print(f"image_url: {image_url}")
+        print(f"local_path: {local_path}")
+        print(f"cloud_path: {cloud_path}")
+        print(f"model_arch: {model_arch}")
+        print(f"classes_length: {classes_length}")
+
+        if not all([image_url, local_path, model_arch, classes_length]):
+            missing = [k for k, v in {
+                'image_url': image_url,
+                'local_path': local_path,
+                'model_arch': model_arch,
+                'classes_length': classes_length
+            }.items() if not v]
+            error_msg = f"Missing required parameters: {', '.join(missing)}"
+            print(error_msg)
+            return jsonify({'error': error_msg}), 400
+
+        # Verify paths exist
+        if not os.path.exists(local_path):
+            print(f"Warning: Local path does not exist: {local_path}")
+        
+        # Run the classification script with both paths
+        cmd = ['python', 'classify_image.py', image_url, local_path, cloud_path, model_arch, str(classes_length)]
+        print(f"Running command: {' '.join(cmd)}")
+        
         result = subprocess.run(
-            ['python3', './classify_image.py', image_url, model_path,model_arch, str(classes_length)],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+            cmd,
+            capture_output=True,
+            text=True,
+            check=True
         )
-
-       
-        if result.returncode != 0:
-            return jsonify({'error': f"Error classifying image: {result.stderr}"}), 500
-
-        # Parse the JSON output from classify_image.py
+        
+        print("Script stdout:", result.stdout)
+        print("Script stderr:", result.stderr)
+        
+        # Parse the classification result from stdout
         try:
-            classification_result = json.loads(result.stdout.strip())
-            return jsonify({
-                "predicted_class": classification_result["predicted_class"],
-                "confidences": classification_result["confidences"]
-            }), 200
+            classification_result = json.loads(result.stdout)
+            return jsonify(classification_result), 200
         except json.JSONDecodeError as e:
-            return jsonify({'error': f"Error parsing classification result: {str(e)}"}), 500
+            error_msg = f"Failed to parse classification result: {str(e)}\nOutput was: {result.stdout}"
+            print(error_msg)
+            return jsonify({'error': error_msg}), 500
 
+    except subprocess.CalledProcessError as e:
+        error_msg = f"Classification script error:\nCommand: {' '.join(e.cmd)}\nExit code: {e.returncode}\nOutput: {e.output}\nStderr: {e.stderr}"
+        print(error_msg)
+        return jsonify({'error': error_msg}), 500
     except Exception as e:
-       
-        return jsonify({'error': str(e)}), 500
+        error_msg = f"Server error: {str(e)}\nFull error: {repr(e)}"
+        print(error_msg)
+        return jsonify({'error': error_msg}), 500
 
 
 
 if __name__ == '__main__':
-   port = int(os.environ.get("PORT", 8000))       
-   host = "0.0.0.0"                           
-   app.run(host=host, port=port)
+   app.run(debug=True, port=5000)
