@@ -93,6 +93,7 @@ const handleTrainNewModel = async (req, res) => {
     });
     const modelPath = response.data.modelPath;
     const cloudPath = response.data.cloudPath;
+    
 
     console.log('Training Response:', response.data);
     console.log("Model path:", modelPath);
@@ -218,11 +219,23 @@ const classifyImage = async (req, res) => {
     const confidences = response.data.confidences;
     console.log("Classification result:", result);
     console.log("Confidences:", confidences);
+    const isOther = response.data.is_other;
+    console.log("Is other:", isOther);
 
-    res.status(200).json({
-      result: model.classes[result],
-      confidences: confidences
-    });
+    if(!isOther){
+      res.status(200).json({
+        result: model.classes[result],
+        confidences: confidences,
+        isOther
+      });
+    }
+    else{
+      res.status(200).json({
+        result: "Other / uncertain",
+        confidences: confidences,
+        isOther
+      });
+      }
   } catch (err) {
     console.error("Error in classification:", err);
     if (err.response) {

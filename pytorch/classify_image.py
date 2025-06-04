@@ -9,6 +9,7 @@ import io
 from google.cloud import storage
 from dotenv import load_dotenv
 import os
+import numpy as np
 
 # Load environment variables from .env file
 load_dotenv()
@@ -152,17 +153,28 @@ def classify_image(image_url, local_path, cloud_path, model_arch, classes_length
         with torch.no_grad():
             output = model(img_tensor)
             probabilities = torch.nn.functional.softmax(output[0], dim=0)
-            predicted_class = torch.argmax(probabilities).item()
             confidences = probabilities.tolist()
 
+        threshold = 0.58  # 58%
+        max_confidence = max(confidences)
+        predicted_class = int(np.argmax(confidences))
+
+        if max_confidence >= threshold:
+            predicted_label = str(predicted_class)  # Just use the index as label
+            is_other = False
+        else:
+            predicted_label = "other/uncertain"
+            is_other = True
+
         result = {
-            "predicted_class": predicted_class,
-            "confidences": confidences
+            "predicted_class": predicted_class if not is_other else None,
+            "predicted_label": predicted_label,
+            "confidences": confidences,
+            "is_other": is_other,
+            "max_confidence": float(max_confidence)
         }
         log("\nClassification completed successfully")
         log("Result: " + json.dumps(result, indent=2))
-        
-        # Print only the JSON result to stdout
         print(json.dumps(result))
         return result
 

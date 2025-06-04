@@ -18,7 +18,7 @@ const ClassifyImage = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [notification, setNotification] = useState({ show: false, message: '', type: '' })
   const [selectedFile, setSelectedFile] = useState(null)
-  const [confidence, setConfidence] = useState([])
+  const [isOther, setIsOther] = useState(false)
 
   const {id} = useParams()
   const navigate = useNavigate()
@@ -123,8 +123,16 @@ const ClassifyImage = () => {
       // Transform the result to include confidences for all classes
       const result = {
         label: data.result,
-        confidences:data.confidences
+        confidences:data.confidences,
+        isOther: data.isOther,
         
+        
+      }
+
+      if(data.isOther){
+        setIsOther(true)
+        setClasses([...classes, "Other / uncertain"])
+
       }
       setClassificationResult(result)
       setNotification({
@@ -138,6 +146,7 @@ const ClassifyImage = () => {
         message: 'Error classifying image',
         type: 'error'
       })
+      console.log("Error classifying image", err)
     } finally {
       setIsLoading(false)
     }
@@ -177,7 +186,7 @@ const ClassifyImage = () => {
                   {classItem}
                   {classificationResult && (
                     <span className="confidence-value">
-                      {(confidence * 100).toFixed(1)}%
+                      { isOther&& classificationResult.label===classItem? 'Model not sure': (confidence * 100).toFixed(1)+'%'}
                     </span>
                   )}
                 </div>
