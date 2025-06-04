@@ -12,6 +12,7 @@ const  modelSchema=new mongoose.Schema({
     modelArcheticture:{type:String},
     modelCategory:{type:String},
     dataset:{type:String},
+    featureImage:{type:String},
    createdBy: {
         type: mongoose.Schema.Types.ObjectId,  
         ref: 'User',

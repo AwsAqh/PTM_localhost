@@ -148,7 +148,7 @@ const BrowsePreTrainedModels = () => {
             modelCreatedAt={model.createdAt}
             modelCreatedBy={model.creatorName}
             modelCreatorEmail={model.creatorEmail}
-       
+            featureImage={model.featureImage}
             id={model._id} 
           />
         )}

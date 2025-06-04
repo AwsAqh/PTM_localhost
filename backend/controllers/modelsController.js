@@ -11,6 +11,12 @@ const mongoose = require('mongoose');
 
 const upload = multer({ storage });
 
+function withTimeout(promise, ms) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Upload timeout')), ms))
+  ]);
+}
 
 
 
@@ -23,7 +29,7 @@ const uploadToCloudinary = (file, modelFolder) => {
       if (err) {
         reject(err);
       } else {
-        console.log('File uploaded to Cloudinary:', result.secure_url);
+        
         resolve(result);
       }
     }).end(file.buffer);
@@ -42,8 +48,11 @@ const handleTrainNewModel = async (req, res) => {
   const uniqueModelId = uuid.v4().slice(0, 8);
   const modelNameWithUniqueId = `${req.body.modelName}_${uniqueModelId}`;
 
-  // Collect all upload promises
+  // Collect all upload promises and track the first image
   let uploadPromises = [];
+  let firstClassFirstImage = null;
+  let firstClassFound = false;
+
   for (let i = 0; i < classesCount; i++) {
     const className = req.body[`class_name_${i}`];
     if (!className) {
@@ -53,9 +62,18 @@ const handleTrainNewModel = async (req, res) => {
 
     const classFiles = req.files.filter(file => file.fieldname === `class_dataset_${i}`);
     if (classFiles && classFiles.length > 0) {
-      classFiles.forEach((file) => {
+      classFiles.forEach((file, fileIndex) => {
         const modelFolder = `dataset/${modelNameWithUniqueId}/${className}`;
-        uploadPromises.push(uploadToCloudinary(file, modelFolder));
+        const uploadPromise = withTimeout(uploadToCloudinary(file, modelFolder), 1000*30*60).then(result => {
+          // Save the first image URL from the first class
+          if (!firstClassFound && fileIndex === 0) {
+            firstClassFirstImage = result.secure_url;  // Save the Cloudinary URL directly
+            firstClassFound = true;
+            console.log("Feature image URL:", firstClassFirstImage);
+          }
+          return result;
+        });
+        uploadPromises.push(uploadPromise);
       });
     } else {
       console.log(`No files for class_${i}`);
@@ -79,6 +97,7 @@ const handleTrainNewModel = async (req, res) => {
     console.log('Training Response:', response.data);
     console.log("Model path:", modelPath);
     console.log("Cloud path:", cloudPath);
+    console.log("Feature image URL:", firstClassFirstImage);
 
     try {
       console.log("User ID:", req.userId);
@@ -91,7 +110,8 @@ const handleTrainNewModel = async (req, res) => {
         classes: classNames,
         modelArcheticture: modelArch,
         modelCategory: modelCategory,
-        createdBy: req.userId
+        createdBy: req.userId,
+        featureImage: firstClassFirstImage  // Save the Cloudinary URL directly
       });
       const savedModel = await newModel.save();
       res.json({
@@ -100,7 +120,8 @@ const handleTrainNewModel = async (req, res) => {
         classNames: classNames,
         modelPath: modelPath,
         cloudPath: cloudPath,
-        modelId: savedModel._id
+        modelId: savedModel._id,
+        featureImage: firstClassFirstImage
       });
     } catch (error) {
       console.log("Error saving model document:", error);

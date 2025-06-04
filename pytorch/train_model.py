@@ -18,6 +18,8 @@ import time
 import io
 from google.cloud import storage
 import json
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 # Load environment variables from .env file
 load_dotenv()
@@ -83,16 +85,25 @@ class CloudinaryDataset(Dataset):
         self.is_training = is_training
         self.image_list = [(class_name, url) for class_name, urls in self.image_urls.items() for url in urls]
 
+        # Set up a requests session with retry logic
+        self.session = requests.Session()
+        retries = Retry(
+            total=5,
+            backoff_factor=2,
+            status_forcelist=[429, 500, 502, 503, 504],
+            allowed_methods=["GET"]
+        )
+        self.session.mount('https://', HTTPAdapter(max_retries=retries))
+
     def __len__(self):
         return len(self.image_list)
 
     def __getitem__(self, idx):
         class_name, image_url = self.image_list[idx]
         try:
-            response = requests.get(image_url, timeout=10)
+            response = self.session.get(image_url, timeout=None)
             if response.status_code != 200:
                 print(f"[ERROR] Failed to fetch image: {image_url} (status {response.status_code})")
-                # Optionally, return a blank image or skip
                 raise ValueError("Image fetch failed")
             content_type = response.headers.get('Content-Type', '')
             if 'image' not in content_type:
@@ -108,10 +119,8 @@ class CloudinaryDataset(Dataset):
             label = list(self.image_urls.keys()).index(class_name)
             return img, label
         except Exception as e:
-            print(f"[ERROR] Could not process image {image_url}: {e}")
-            # Optionally, return a dummy image or raise
-            # For now, raise to catch in DataLoader
-            raise
+            print(f"[ERROR] Could not process image {image_url}: {e}. Skipping this image.")
+            return None, None
 
 def setup_model(model_arch, num_classes):
     if model_arch == 'resnet50':

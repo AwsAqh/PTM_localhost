@@ -25,3 +25,4 @@ dist-ssr
 *.env
 *.pth
 pytorch/secrets/*.json
+pytorch/Train-script-explained.txt
