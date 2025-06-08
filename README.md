@@ -1,8 +1,10 @@
-# PTM: Cloud-Based Image Classification Platform
+# Portable Teachable Machine: Cloud-Based Image Classification Platform
 
 ## Overview
 
 PTM is a full-stack platform for training, managing, and deploying custom image classification models. Users can upload datasets, train models using transfer learning (ResNet, GoogLeNet, MobileNetV2), and classify new images via a modern web interface. The system supports cloud storage (Cloudinary, Google Cloud Storage) and robust handling of out-of-distribution images.
+
+**Note:** PTM also includes a mobile app, and supports capturing images directly from a Raspberry Pi device. This makes it a truly portable teachable machine, enabling on-the-go data collection and model training from various devices.
 
 ---
 
