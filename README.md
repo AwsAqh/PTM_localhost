@@ -59,16 +59,16 @@ cd ptm
 cd backend
 npm install
 # Set up your .env file with Cloudinary, MongoDB, and JWT secrets
-npm start
+node app.js
 ```
 
 ### 3. Frontend Setup
 
 ```bash
-cd ../frontend
+cd ..
 npm install
 # Set up your .env file with API URLs
-npm start
+npm run dev
 ```
 
 ### 4. Python Training Server
