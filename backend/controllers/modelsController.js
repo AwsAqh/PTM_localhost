@@ -11,6 +11,7 @@ const mongoose = require('mongoose');
 
 const upload = multer({ storage });
 
+
 function withTimeout(promise, ms) {
   return Promise.race([
     promise,
@@ -37,6 +38,8 @@ const uploadToCloudinary = (file, modelFolder) => {
 };
 
 const handleTrainNewModel = async (req, res) => {
+  const { default: pLimit } = await import('p-limit');
+const limit = pLimit(19);
   if (!req.files || req.files.length === 0) {
     return res.status(400).json({ message: 'No files uploaded.' });
   }
@@ -54,6 +57,7 @@ const handleTrainNewModel = async (req, res) => {
   let firstClassFound = false;
 
   for (let i = 0; i < classesCount; i++) {
+    console.log(req.body[`class_name_${i}`])
     const className = req.body[`class_name_${i}`];
     if (!className) {
       return res.status(400).json({ message: `Missing class name for class_${i}` });
@@ -63,17 +67,17 @@ const handleTrainNewModel = async (req, res) => {
     const classFiles = req.files.filter(file => file.fieldname === `class_dataset_${i}`);
     if (classFiles && classFiles.length > 0) {
       classFiles.forEach((file, fileIndex) => {
-        const modelFolder = `dataset/${modelNameWithUniqueId}/${className}`;
-        const uploadPromise = withTimeout(uploadToCloudinary(file, modelFolder), 1000*30*60).then(result => {
-          // Save the first image URL from the first class
-          if (!firstClassFound && fileIndex === 0) {
-            firstClassFirstImage = result.secure_url;  // Save the Cloudinary URL directly
-            firstClassFound = true;
-            console.log("Feature image URL:", firstClassFirstImage);
-          }
-          return result;
-        });
-        uploadPromises.push(uploadPromise);
+        // wrap the upload call in p-limit
+        const job = limit(() =>
+          withTimeout(uploadToCloudinary(file, `dataset/${modelNameWithUniqueId}/${className}`), 30 * 60 * 1000)
+            .then(result => {
+              if (!firstClassFound && fileIndex === 0) {
+                firstClassFirstImage = result.secure_url;
+                firstClassFound = true;
+              }
+              return result;
+            }))
+        uploadPromises.push(job);
       });
     } else {
       console.log(`No files for class_${i}`);

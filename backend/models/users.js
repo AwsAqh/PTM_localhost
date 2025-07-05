@@ -9,6 +9,8 @@ createdAt: {
     type: Date,
     default: Date.now,
   },
+  resetPasswordPin:  {type: String, default: null},
+  resetPasswordExpires: {type: Date, default: null},
 
 
 })
