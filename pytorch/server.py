@@ -49,22 +49,23 @@ def train_model():
 def classify():
     try:
         data = request.json
-        print("Received data:", data)  # Log received data
+        print("Received data:", data)
         
-        image_url = data.get('image_url')
-        local_path = data.get('local_path')
-        cloud_path = data.get('cloud_path')
-        model_arch = data.get('model_arch')
-        classes_length = data.get('classes_length')
+        # Coerce None → ""
+        image_url     = data.get('image_url')    or ""
+        local_path    = data.get('local_path')   or ""
+        cloud_path    = data.get('cloud_path')   or ""
+        model_arch    = data.get('model_arch')   or ""
+        classes_length= data.get('classes_length')
 
-        # Validate and log each parameter
-        print(f"Parameters received:")
+        print("Parameters received:")
         print(f"image_url: {image_url}")
         print(f"local_path: {local_path}")
         print(f"cloud_path: {cloud_path}")
         print(f"model_arch: {model_arch}")
         print(f"classes_length: {classes_length}")
 
+        # Basic validation
         if not all([image_url, local_path, model_arch, classes_length]):
             missing = [k for k, v in {
                 'image_url': image_url,
@@ -76,41 +77,54 @@ def classify():
             print(error_msg)
             return jsonify({'error': error_msg}), 400
 
-        # Verify paths exist
         if not os.path.exists(local_path):
             print(f"Warning: Local path does not exist: {local_path}")
-        
-        # Run the classification script with both paths
-        cmd = ['python', 'classify_image.py', image_url, local_path, cloud_path, model_arch, str(classes_length)]
+
+        cmd = [
+            'python', 'classify_image.py',
+            image_url, local_path, cloud_path,
+            model_arch, str(classes_length)
+        ]
         print(f"Running command: {' '.join(cmd)}")
-        
+
         result = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
             check=True
         )
-        
         print("Script stdout:", result.stdout)
         print("Script stderr:", result.stderr)
-        
-        # Parse the classification result from stdout
+
+        # grab only the last line (the JSON) for parsing
+        out_lines = result.stdout.strip().splitlines()
+        json_line = out_lines[-1] if out_lines else ""
         try:
-            classification_result = json.loads(result.stdout)
+            classification_result = json.loads(json_line)
             return jsonify(classification_result), 200
         except json.JSONDecodeError as e:
-            error_msg = f"Failed to parse classification result: {str(e)}\nOutput was: {result.stdout}"
+            error_msg = (
+                f"Failed to parse classification result: {e}\n"
+                f"Output was:\n{result.stdout}"
+            )
             print(error_msg)
             return jsonify({'error': error_msg}), 500
 
     except subprocess.CalledProcessError as e:
-        error_msg = f"Classification script error:\nCommand: {' '.join(e.cmd)}\nExit code: {e.returncode}\nOutput: {e.output}\nStderr: {e.stderr}"
+        error_msg = (
+            f"Classification script error:\n"
+            f"Command: {' '.join(e.cmd)}\n"
+            f"Exit code: {e.returncode}\n"
+            f"Output: {e.output}\nStderr: {e.stderr}"
+        )
         print(error_msg)
         return jsonify({'error': error_msg}), 500
+
     except Exception as e:
-        error_msg = f"Server error: {str(e)}\nFull error: {repr(e)}"
+        error_msg = f"Server error: {e}\nFull error: {repr(e)}"
         print(error_msg)
         return jsonify({'error': error_msg}), 500
+
 
 
 
