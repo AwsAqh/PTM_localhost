@@ -6,7 +6,7 @@ import ClassBlock from '../components/class-block'
 import Header from '../components/header'
 import Notification from '../components/Notification'
 import axios from 'axios';
-
+import jwt_decode from 'jwt-decode';
 
 
 const TrainNewModel = () => {
@@ -74,35 +74,72 @@ const TrainNewModel = () => {
         const handleAddClass = () => {
             const newClassId = classes.length + 1;
             const newClassName = `class ${newClassId}`;
-        
+            
+            // Add ref immediately
+            clsRefs.current.push(React.createRef());
+            
             setClasses((prevClasses) => {
-              const newClasses = [...prevClasses, { id: newClassId, name: newClassName }];
-              // Ensure that refs are in sync with classes array
-              clsRefs.current = newClasses.map(() => React.createRef()); // Update refs dynamically
-              return newClasses;
+              return [...prevClasses, { id: newClassId, name: newClassName }];
             });
+            
+            // Add empty files array for the new class
+            setFilesState((prevFilesState) => {
+              return [...prevFilesState, []];
+            });
+            
           };
         
+          const handleResetClassFiles=(index)=>{
+            setFilesState(prevState=>{
+              const current=[...prevState]
+              current[index]=[]
+              return current
+
+
+            })
+
+          }
+          const handleDeleteClass = (idx) => {
+            // Update refs immediately before state changes
+            clsRefs.current = clsRefs.current.filter((_, index) => index !== idx);
+            
+            // First remove the class
+            setClasses((prevClasses) => {
+              return prevClasses.filter((_, index) => index !== idx);
+            });
           
-          const handleDeleteClass = (id) => {
-            setClasses((prevClasses) => {
-              const newClasses = prevClasses.filter(classItem => classItem.id !== id);
-              // Update refs to match the new classes list
-              clsRefs.current = newClasses.map(() => React.createRef()); // Remove ref for deleted class
-              setFilesState((prevFilesState) => prevFilesState.filter((_, index) => prevClasses[index].id !== id));
-              return newClasses;
+            // Then update the filesState in sync
+            setFilesState((prevFilesState) => {
+              return prevFilesState.filter((_, index) => index !== idx);
             });
+
           };
 
-
-        const handleFileChange = (files, index) => {
+          const handleFileChange = (newFiles, index) => {
             setFilesState((prevFilesState) => {
               const updatedFilesState = [...prevFilesState];
-              updatedFilesState[index] = files; // Update the files for the specific class
+              const existingFiles = updatedFilesState[index];
+          
+              // Create a DataTransfer to build a new FileList
+              const dataTransfer = new DataTransfer();
+          
+              // Add existing files (if any)
+              if (existingFiles instanceof FileList) {
+                for (let i = 0; i < existingFiles.length; i++) {
+                  dataTransfer.items.add(existingFiles[i]);
+                }
+              }
+          
+              // Add new files
+              for (let i = 0; i < newFiles.length; i++) {
+                dataTransfer.items.add(newFiles[i]);
+              }
+          
+              updatedFilesState[index] = dataTransfer.files; // New FileList
+              console.log("Updated FileList:", updatedFilesState[index]);
               return updatedFilesState;
             });
           };
-        
        
         const handleValidation=()=>{
           const emptyOnes=clsRefs.current.filter(ref=>ref.current.value.trim()==="")
@@ -150,9 +187,52 @@ const TrainNewModel = () => {
        
 
           const handleSubmit = () => {
-            console.log("the ref for category if it's not selected : ",modelCategory.current.value)
-            const names = clsRefs.current.map(ref => ref.current ? ref.current.value : null);
-            console.log("inside train new model , , ", localStorage.getItem("token"))
+           
+            // Validate that we have the correct number of refs
+            if (clsRefs.current.length !== classes.length) {
+              console.error('Mismatch: refs count =', clsRefs.current.length, 'classes count =', classes.length);
+              setNotification({
+                show: true,
+                message: 'Internal error: class references are out of sync. Please refresh the page.',
+                type: 'error'
+              });
+              return;
+            }
+
+            // Get names from refs with proper validation
+            const names = clsRefs.current.map((ref, index) => {
+              if (!ref) {
+                console.error('Ref is null at index:', index);
+                return null;
+              }
+              if (!ref.current) {
+                console.error('Ref.current is null at index:', index);
+                return null;
+              }
+              if (!ref.current.value) {
+                console.error('Ref.current.value is empty at index:', index);
+                return null;
+              }
+              return ref.current.value.trim();
+            });
+
+            // Validate that all names are present
+            const missingNames = names.filter(name => !name);
+            if (missingNames.length > 0) {
+              console.error('Missing names:', missingNames);
+              setNotification({
+                show: true,
+                message: 'Some class names are missing. Please fill in all class names.',
+                type: 'error'
+              });
+              return;
+            }
+
+            console.log('Classes:', classes);
+            console.log('Names from refs:', names);
+            console.log('Refs count:', clsRefs.current.length);
+            console.log('Classes count:', classes.length);
+
             const formData = new FormData();
             formData.append("modelName", modelName.current.value);  
             formData.append("modelDescription", modelDescription.current.value)
@@ -164,15 +244,21 @@ const TrainNewModel = () => {
             
            
             classes.forEach((classItem, index) => {
-              formData.append(`class_name_${index}`, names[index]); // Add class name dynamically
+              const className = names[index];
+              console.log(`Adding class ${index}: ${className}`);
+              formData.append(`class_name_${index}`, className);
               const dataset = filesState[index];
+            
               if (dataset instanceof FileList) {
+                
                 Array.from(dataset).forEach(file => {
+                  
                   formData.append(`class_dataset_${index}`, file);  // Append each file under a unique key
                 });
               }
             });
 
+           
             // Show loading notification
             setNotification({
               show: true,
@@ -185,7 +271,7 @@ const TrainNewModel = () => {
               headers: {
                 'Content-Type': 'multipart/form-data', 
                 "x-auth-token":localStorage.getItem("token")
-              }
+              } 
             })
               .then((response) => {
                 console.log('Files uploaded:', response.data);
@@ -263,14 +349,18 @@ const TrainNewModel = () => {
                          {
                           classes.map((classItems,index) =>
                            <ClassBlock
+                           
                             elref={clsRefs.current[index]}
-                            fileState={filesState[index]}
+                            fileState={filesState[index]||[]}
                             setter={setFilesState}
                             onFileChange={(e) => handleFileChange(e.target.files, index)}
-                            onDelete={handleDeleteClass}
+                            onDelete={()=>handleDeleteClass(index)}
                              key={classItems.id}
-                              id={classItems.id}
-                              classesCount={classes.length} />)}
+                              id={index}
+                              classesCount={classes.length}
+                              onReset={()=>handleResetClassFiles(index)} />)
+                              }
+                           
                                 
                     </div>
 

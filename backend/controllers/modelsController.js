@@ -94,6 +94,11 @@ const limit = pLimit(19);
       modelName: modelNameWithUniqueId,
       classes: classNames,
       modelArch,
+    } ,
+    {
+      timeout: 0,               // disable timeout
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,  // if you’re sending/receiving large payloads
     });
     const modelPath = response.data.modelPath;
     const cloudPath = response.data.cloudPath;

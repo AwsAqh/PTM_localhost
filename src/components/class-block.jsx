@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import "../styles/class-block.css"
 import Button from './Button'
-const ClassBlock = ({ onDelete, id, elref,onFileChange,classesCount }) => {
+const ClassBlock = ({ onDelete, id,fileState, elref,onFileChange,classesCount,onReset }) => {
 
     const [fileName, setFileName] = useState("Upload")
     const [isValid, setIsValid] = useState(true); 
@@ -27,11 +27,14 @@ const ClassBlock = ({ onDelete, id, elref,onFileChange,classesCount }) => {
           />
          
           <label htmlFor={`fileUpload-${id}`} className="btn btn-primary btn-sm">
-            {fileName} 
+           {fileState?.length!=0? fileState.length:"Upload" }
           </label>
-  
+
+          <Button   type="button" className="btn btn-secondary btn-sm" onClick={ onReset }>
+            Reset
+          </Button>
     
-          <Button disabled={classesCount === 2}   type="button" className="btn btn-secondary btn-sm" onClick={() => { onDelete(id); }}>
+          <Button disabled={classesCount === 2}   type="button" className="btn btn-secondary btn-sm" onClick={() =>  onDelete() }>
             Delete
           </Button>
         </div>

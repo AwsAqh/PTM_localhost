@@ -80,6 +80,7 @@ const ClassifyImage = () => {
   }, [createdBy])
 
   const handleImageSelect = (e) => {
+    
     const file = e.target.files[0]
     if (file) {
       setSelectedFile(file)
@@ -198,6 +199,7 @@ const ClassifyImage = () => {
         <div className='classify-area'>
           <div className='classify-block'>
             {selectedImage ? (
+              <>
               <div className='selected-image-container'>
                 <img src={selectedImage} alt="Selected" className='selected-image' />
                 <button 
@@ -208,10 +210,18 @@ const ClassifyImage = () => {
                   {isLoading ? 'Classifying...' : 'Classify Image'}
                 </button>
               </div>
-            ) : (
-              <>
+
+        
+              </>
+            ) :null} 
+                
+              {!selectedImage&&(
+                <>
                 <img src={Upload} alt="Upload" />
                 <p>Capture an image!</p>
+                </>
+                )}
+                <>
                 <input
                   name='file'
                   className='img-input'
@@ -225,7 +235,7 @@ const ClassifyImage = () => {
                   Upload Image
                 </label>
               </>
-            )}
+            
           </div>
         </div>
       </div>

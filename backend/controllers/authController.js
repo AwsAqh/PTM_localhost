@@ -96,10 +96,10 @@ exports.register=async(req,res)=>{
 
 
 exports.login=async (req,res)=>{
-   console.log("inside login")
+ 
     if(!req.body.email || !req.body.password) return res.status(400).json({msg:"missing email or password"})
         const {email,password}=req.body
-console.log("login body: ", email , password)
+
 try{
         
     const checkUser=await User.findOne({email})
