@@ -1,10 +1,30 @@
 # Portable Teachable Machine: Cloud-Based Image Classification Platform
 
-## Overview
+---
 
-PTM is a full-stack platform for training, managing, and deploying custom image classification models. Users can upload datasets, train models using transfer learning (ResNet, GoogLeNet, MobileNetV2), and classify new images via a modern web interface. The system supports cloud storage (Cloudinary, Google Cloud Storage) and robust handling of out-of-distribution images.
+## Local Development & Project Preview
 
-**Note:** PTM also includes a mobile app, and supports capturing images directly from a Raspberry Pi device. This makes it a truly portable teachable machine, enabling on-the-go data collection and model training from various devices.
+This project is designed for **local development**. All services (frontend, backend, and training server) run on your machine. You will need local instances of MongoDB, Node.js, Python, and the required cloud credentials.
+
+**Quickstart Overview:**
+1. Clone the repo and install dependencies.
+2. Set up MongoDB locally and configure the connection string.
+3. Set up Cloudinary (for image storage) and Google Cloud Storage (for model storage).
+4. Create required folders (notably `pytorch/models`).
+5. Set environment variables in `.env` files for each service.
+6. Start backend, frontend, and PyTorch server.
+7. Use the web interface to upload datasets, train models, and classify images.
+
+---
+
+## Mobile App
+
+A companion **mobile app** is available for on-the-go data collection and model training. You can find the mobile app repository here:
+
+- [PTM Mobile App Repository](https://github.com/awsaqh/ptm-mobile)  
+
+
+The mobile app allows you to capture images and interact with your PTM backend from your phone or tablet.
 
 ---
 
@@ -60,9 +80,19 @@ cd ptm
 ```bash
 cd backend
 npm install
-# Set up your .env file with Cloudinary, MongoDB, and JWT secrets
+# Set up your .env file with Cloudinary and JWT secrets
 node app.js
 ```
+
+#### Backend .env Example
+Create a `backend/.env` file with the following:
+```
+CloudName=your_cloudinary_cloud_name
+ApiKey=your_cloudinary_api_key
+ApiSecret=your_cloudinary_api_secret
+JWT_SECRET=your_jwt_secret
+```
+**Note:** The MongoDB connection string is hardcoded as `mongodb://localhost:27017/ptm-local` in `backend/app.js`. There is no need to set it in the .env file, just modify it as what is your connection string.
 
 ### 3. Frontend Setup
 
@@ -82,9 +112,24 @@ pip install -r requirements.txt
 python server.py
 ```
 
+#### PyTorch Server .env Example
+Create a `pytorch/.env` file with the following:
+```
+CloudName=your_cloudinary_cloud_name
+ApiKey=your_cloudinary_api_key
+ApiSecret=your_cloudinary_api_secret
+GOOGLE_APPLICATION_CREDENTIALS=secrets/gcs-key.json
+GCP_KEY_JSON=your_gcp_key_json_contents   # (optional, for Render.com or similar)
+```
+
 ---
 
 ## Cloud Storage & API Key Setup
+
+### MongoDB (Local Database)
+- Install MongoDB locally and ensure it is running.
+- The backend connects to MongoDB using the hardcoded URI `mongodb://localhost:27017/ptm-local` in `backend/app.js`.
+- **No need to set the MongoDB connection string in the .env file.**
 
 ### Google Cloud Storage (GCS) for Model Storage
 
@@ -160,13 +205,41 @@ python server.py
 
 ### Summary of Required Files & Folders
 
-- `pytorch/.env` (with GCS credentials)
+- `pytorch/.env` (with GCS and Cloudinary credentials)
 
 - `pytorch/secrets/gcs-key.json` (GCS service account key)
 
-- `pytorch/models/` (local model storage)
+- `pytorch/models/` (**must exist** for local model storage)
 
-- `backend/.env` (with Cloudinary credentials)
+- `backend/.env` (with Cloudinary, MongoDB, and JWT credentials)
+
+---
+
+## Folder Structure
+
+```
+ptm/
+├── backend/
+│   ├── .env
+│   └── ...
+├── pytorch/
+│   ├── .env
+│   ├── secrets/
+│   │   └── gcs-key.json
+│   ├── models/   # <--- Models are saved here locally
+│   └── ...
+├── src/ (frontend)
+├── screenshots/
+└── ...
+```
+
+---
+
+## How Model Saving Works
+- **During training**, models are always saved locally to `pytorch/models/`.
+- If Google Cloud credentials are provided, the model is also uploaded to your GCS bucket.
+- The GCS bucket and credentials are set in `pytorch/secrets/gcs-key.json` and referenced in `.env`.
+- If the GCS secret file is missing, models are only saved locally.
 
 ---
 
@@ -213,6 +286,10 @@ python server.py
 ### Classification Result
 
 ![Classification Result](screenshots/classification_result.png)
+
+### Reset Password
+
+![Reset Password](screenshots/reset_password.png)
 
 ---
 

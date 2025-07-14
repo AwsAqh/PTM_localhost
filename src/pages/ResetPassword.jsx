@@ -186,7 +186,7 @@ const ResetPassword = (route) => {
         <div className='reset-area'>
 
                 <div className='pin-area flex-lyt'>
-                    <span>Please enter the pin recived to email@example.com</span>
+                    <span>Please enter the pin recived to {state.email}</span>
                     <div className='pin-validation flex-lyt'>
                         <input ref={digitOne} id='0' className='pin-digit-input' type='number' onChange={handlePinChange}  onKeyDown={handleKeyDown} />
                         <input ref={digitTwo}  id='1'className='pin-digit-input' type='number' onChange={handlePinChange} onKeyDown={handleKeyDown}/>
