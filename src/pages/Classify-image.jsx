@@ -76,7 +76,7 @@ const ClassifyImage = () => {
   }, [id])
 
   useEffect(() => {
-    console.log("createdBy : ",createdBy)
+   
   }, [createdBy])
 
   const handleImageSelect = (e) => {
@@ -132,8 +132,12 @@ const ClassifyImage = () => {
 
       if(data.isOther){
         setIsOther(true)
-        setClasses([...classes, "Other / uncertain"])
-
+        setClasses(prev => {
+          if (prev.some(c => c.name === "Other / uncertain")) {
+            return prev;
+          }
+          return [...prev, { name: "Other / uncertain" }];
+        });
       }
       setClassificationResult(result)
       setNotification({
@@ -147,7 +151,7 @@ const ClassifyImage = () => {
         message: 'Error classifying image',
         type: 'error'
       })
-      console.log("Error classifying image", err)
+    
     } finally {
       setIsLoading(false)
     }
@@ -223,7 +227,7 @@ const ClassifyImage = () => {
                 )}
                 <>
                 <input
-                  name='file'
+                  name='file' 
                   className='img-input'
                   type='file'
                   onChange={handleImageSelect}

@@ -9,20 +9,20 @@ const HomePage = () => {
 
   useEffect((  )=>{
     const token=localStorage.getItem("token")
-    console.log(token)
+  
     if(!token) navigate("/login")
       try{
         const decodedToken = jwt_decode(token)
     const now= Date.now()/1000
     if(decodedToken.exp<now){
-      console.log("token expired ! ")
+     
       localStorage.removeItem('token')
       navigate('/login')
     }
 
     }
     catch(err){
-      console.log("failed to decode token ",err)
+     
       localStorage.removeItem('token')
       navigate('/login')
     }

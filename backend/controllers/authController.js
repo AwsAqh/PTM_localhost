@@ -106,7 +106,7 @@ try{
     if(!checkUser) res.status(401).json({msg:"email does not exist"})
     const isMatch=await bcrypt.compare(password,checkUser.password)
     if( isMatch){
-        console.log(" info matched !!")
+        
         const token=jwt.sign({userId:checkUser._id},secretKey,{expiresIn:"24h"})
         res.status(200).json({token})}
     else res.status(401).json({msg:"Email or password error"})
@@ -168,7 +168,7 @@ exports.forgotPassword=async(req,res)=>{
 exports.confirmPin=async(req,res)=>{
 
     const {email,pin}=req.body
-    
+        console.log(email,pin)
 try{
     const user=await User.findOne({email})
    
@@ -177,6 +177,7 @@ try{
         if(user.resetPasswordPin!==pin || user.resetPasswordExpires<Date.now()){
            return res.status(400).json({msg:"Invalid pin , or pin expired"})
         }
+        console.log("correct pin")
        return res.status(200).json({ message:"correct pin"})
     }catch(err){
         return res.status(500).json({message:"something went wrong"})

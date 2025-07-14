@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react'
-
+import Notification from '../components/Notification'
 import "../styles/login.css"
 
 import { useNavigate } from 'react-router-dom'
@@ -13,21 +13,31 @@ const name=useRef(null)
 const email=useRef(null)
 const password=useRef(null)
 const confirmPassword=useRef(null)
+const [loading,setLoading]=useState(false)
+const [notification,setNotification]=useState({show:false,message:'',type:'',actions:[]})
 
 const handleFormSubmit=async(e)=>{  
     e.preventDefault()    
-    console.log("email : ", email.current.value) 
+
+    if(!email.current.value || !name.current.value || !password.current.value){
+        setNotification({ show:true, message:"Please fill all fileds !", type:"error",actions:[] })
+        return
+
+    }
+    if(password.current.value.length<6){setNotification({ show:true, message:"Password must be 6 characters length!", type:"error",actions:[] })
+        return}
+    if(confirmPassword.current.value!==password.current.value){setNotification({ show:true, message:"passwords must matched! !", type:"error",actions:[]  })
+        return}
 
             let url=`${apiUrl}/api/auth/register`
             let body={name:name.current.value,
                 email:email.current.value,
                 password:password.current.value}
 
-                console.log(body)
+               
     try{
             
-            console.log("before fetch")
-            console.log("body: ",body)
+            setLoading(true)
             const response= await fetch(url,{
                 method:"POST",
                 headers:{
@@ -35,7 +45,7 @@ const handleFormSubmit=async(e)=>{
                 },
                 body:JSON.stringify(body)
             })
-            console.log("after fetch")
+            setLoading(false)
             const data=await response.json()
             if(response.ok){
                 localStorage.setItem("token",data.token)
@@ -45,15 +55,16 @@ const handleFormSubmit=async(e)=>{
 
     }catch(err){
 
-        SetError("something went wrong" , err)
+        setNotification({message:"something went wrong!",show:true,type:'error'})
     }
 
 }
     
-    console.log(error)
+ 
   return (
+   
     <div className='auth-page'>
-
+        {notification.show&&<Notification message={notification.message} type={notification.type} actions={notification.actions} onClose={()=>setNotification({...notification,show:false})}  />}    
 
             
             <div className='auth-area'>
@@ -86,27 +97,13 @@ const handleFormSubmit=async(e)=>{
                                 <input ref={confirmPassword}  placeholder="confirm password" type="password" class="form-control" id="confirm-password"/>
                             </div>
                            
-                            <button type="submit" class="btn btn-primary">Register</button>
+                            <button type="submit" className="login-btn">{loading? "Registering...":"Register"}</button>
                             <div style={{fontSize:"12px", paddingTop:"5px"}}> already have an account? <a href='/login'>Login</a> </div>
                     </form>
                     
                       </div>
 
-                      <div class="options-span">
-                            <div class="line"></div>
-                            <span class="text">Or Register With</span>
-                            <div class="line"></div>
-                      </div>  
-
-
-                      <div class="social-buttons">
-                            <a href="#" class="social-button google">
-                                <i class="fab fa-google"></i> Google
-                            </a>
-                            <a href="#" class="social-button facebook">
-                                <i class="fab fa-facebook-f"></i> Facebook
-                            </a>
-                      </div>
+                      
             </div>
     </div>
   )

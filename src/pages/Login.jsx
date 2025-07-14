@@ -1,21 +1,29 @@
 import React, { useRef, useState } from 'react'
 
 import "../styles/login.css"
-
+import Notification from '../components/Notification'
 import { useNavigate } from 'react-router-dom'
 
 const LoginPage = () => {
     const apiUrl = import.meta.env.VITE_API_BACKEND_URL
-    console.log("apiUrl : ",apiUrl)
+   
     const navigate=useNavigate()
     const [loading,setLoading]=useState(false)
 const [error,setError]=useState("")    
 const formEmail=useRef(null)
 const formPassword=useRef(null)
-
+const [notification,setNotification]=useState({show:false,message:'',type:'',actions:[]})
 const handleFormSubmit=async(e)=>{  
-    e.preventDefault()    
-    console.log("email : ", formEmail.current.value) 
+    e.preventDefault()  
+    
+    
+    if(!formPassword.current.value){  setNotification({ show:true, message:"Please fill all fileds !", type:"error",actions:[] })
+        return
+}
+
+
+
+
 
     let url =`${apiUrl}/api/auth/login`
     let body={
@@ -24,7 +32,7 @@ const handleFormSubmit=async(e)=>{
     
     try{    
 
-            console.log("url : ",url)
+          
             setLoading(true)
             const response=await fetch(url,{
                 method:"POST",
@@ -32,28 +40,41 @@ const handleFormSubmit=async(e)=>{
                 body:JSON.stringify(body)
             })
             setLoading(false)
-            console.log("response : ",response)
+          
             const data=await response.json()
-            console.log("data : ",data)
+      
             if(response.ok) {
                     localStorage.setItem("token",data.token)
-                    console.log("token")
+                 
                     navigate("/home")
             }
-            else (setError(data.msg)) 
+            else (setNotification({message:data.msg,type:"error",actions:[],show:true})) 
 
     }
     catch(error){
         setLoading(false)
-        console.log("error : ",error)
-            setError("something went wrong")
+       
+           setNotification({message:"something went wrong!",type:"error",show:true})
     }
+
+}
+
+const handleForgotClick=()=>{
+
+    if(!formEmail.current.value){
+         
+    setNotification({ show:true, message:"Please fill all fileds !", type:"error",actions:[] })
+        return
+}
+
+navigate('/reset-password',{state:{email:formEmail.current?.value}})
 
 }
 
   return (
     <div className='auth-page'>
 
+{notification.show&&<Notification message={notification.message} type={notification.type} actions={notification.actions} onClose={()=>setNotification({...notification,show:false})}  />}    
 
             
             <div className='auth-area'>
@@ -66,37 +87,31 @@ const handleFormSubmit=async(e)=>{
                     <div className='auth-form'> 
 
                     <form onSubmit={handleFormSubmit}>
-                            <div class="mb-3">
+                            <div className="mb-3">
                                 
-                                <input ref={formEmail} placeholder='Email' type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"/>
+                                <input ref={formEmail} placeholder='Email' required={true} type="email" className="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"/>
                                 
                             </div>
-                            <div class="mb-3">
+                            <div className="mb-3">
                                 
-                                <input ref={formPassword}  placeholder="password" type="password" class="form-control" id="exampleInputPassword1"/>
+                                <input ref={formPassword}  placeholder="password" type="password" className="form-control" id="exampleInputPassword1"/>
                             </div>
-                           
-                            <button type="submit" class="btn btn-primary" >{loading ? "Loading..." : "Login"}</button>
+                            <div style={{display:"flex",flexDirection:'column', gap:"10px"}}>
+                            <button type="submit" className='login-btn' >{loading ? "Loading..." : "Login"}</button>
+
+                            <button type='submit' className='outlined-btn' onClick={handleForgotClick}  >Forgot password</button>
+                            </div>
+
                             <div style={{fontSize:"12px", paddingTop:"5px"}}> Don't have an account? <a href='/register'>Register</a> </div>
+
                     </form>
                     
                       </div>
 
-                      <div class="options-span">
-                            <div class="line"></div>
-                            <span class="text">Or Login With</span>
-                            <div class="line"></div>
-                      </div>  
+                     
 
 
-                      <div class="social-buttons">
-                            <a href="#" class="social-button google">
-                                <i class="fab fa-google"></i> Google
-                            </a>
-                            <a href="#" class="social-button facebook">
-                                <i class="fab fa-facebook-f"></i> Facebook
-                            </a>
-                      </div>
+                      
             </div>
     </div>
   )

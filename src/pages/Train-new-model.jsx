@@ -35,12 +35,12 @@ const TrainNewModel = () => {
       setUserId(decodedToken.userId)
       
       if (decodedToken.exp < currentTime) {
-        console.log("Token has expired.");
+        
         localStorage.removeItem("token"); 
         navigate("/login"); 
       }
     } catch (error) {
-      console.log("Error decoding token", error);
+     
       localStorage.removeItem("token");
       navigate("/login");
     }
@@ -136,7 +136,7 @@ const TrainNewModel = () => {
               }
           
               updatedFilesState[index] = dataTransfer.files; // New FileList
-              console.log("Updated FileList:", updatedFilesState[index]);
+             
               return updatedFilesState;
             });
           };
@@ -190,7 +190,7 @@ const TrainNewModel = () => {
            
             // Validate that we have the correct number of refs
             if (clsRefs.current.length !== classes.length) {
-              console.error('Mismatch: refs count =', clsRefs.current.length, 'classes count =', classes.length);
+         
               setNotification({
                 show: true,
                 message: 'Internal error: class references are out of sync. Please refresh the page.',
@@ -202,24 +202,24 @@ const TrainNewModel = () => {
             // Get names from refs with proper validation
             const names = clsRefs.current.map((ref, index) => {
               if (!ref) {
-                console.error('Ref is null at index:', index);
+              
                 return null;
               }
               if (!ref.current) {
-                console.error('Ref.current is null at index:', index);
+       
                 return null;
               }
               if (!ref.current.value) {
-                console.error('Ref.current.value is empty at index:', index);
+              
                 return null;
               }
               return ref.current.value.trim();
             });
 
-            // Validate that all names are present
+        
             const missingNames = names.filter(name => !name);
             if (missingNames.length > 0) {
-              console.error('Missing names:', missingNames);
+         
               setNotification({
                 show: true,
                 message: 'Some class names are missing. Please fill in all class names.',
@@ -228,10 +228,7 @@ const TrainNewModel = () => {
               return;
             }
 
-            console.log('Classes:', classes);
-            console.log('Names from refs:', names);
-            console.log('Refs count:', clsRefs.current.length);
-            console.log('Classes count:', classes.length);
+        
 
             const formData = new FormData();
             formData.append("modelName", modelName.current.value);  
@@ -245,7 +242,7 @@ const TrainNewModel = () => {
            
             classes.forEach((classItem, index) => {
               const className = names[index];
-              console.log(`Adding class ${index}: ${className}`);
+             
               formData.append(`class_name_${index}`, className);
               const dataset = filesState[index];
             
@@ -274,7 +271,7 @@ const TrainNewModel = () => {
               } 
             })
               .then((response) => {
-                console.log('Files uploaded:', response.data);
+              
                 setNotification({
                   show: true,
                   message: 'Model trained successfully!',
@@ -293,7 +290,7 @@ const TrainNewModel = () => {
                 });
               })
               .catch((error) => {
-                console.error('Error uploading files:', error);
+             
                 setNotification({
                   show: true,
                   message: 'Error training model. Please try again.',
@@ -325,7 +322,7 @@ const TrainNewModel = () => {
                     <input required type="text" ref={modelName} placeholder='Model name' class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"/>
                     <textarea required type="text" ref={modelDescription} placeholder='Model description' class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"/>
                     <div className='arch-ctg-info'>
-                          <select className='form-select' ref={modelArch} onChange={()=>console.log(modelArch.current.value)}>
+                          <select className='form-select' ref={modelArch} >
                               <option value="default" disabled selected>Architecture</option>
                               <option value="resnet50">ResNet50</option>
                               <option value="googlenet">Googlenet</option>

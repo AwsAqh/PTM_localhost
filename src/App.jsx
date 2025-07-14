@@ -8,6 +8,7 @@ import TrainNewModel from './pages/Train-new-model'
 import BrowsePreTrainedModels from './pages/Browse-pre-trained-models'
 import ClassifyImage from './pages/Classify-image'
 import ModelDataset from './pages/ModelDataset'
+import ResetPassword from './pages/ResetPassword'
 
 function App() {
   
@@ -24,6 +25,7 @@ function App() {
           <Route path='/browse/:id' element={<BrowsePreTrainedModels />}/>
           <Route path="/classify/:id" element={<ClassifyImage/>}/>
           <Route path="/dataset/:id" element={<ModelDataset/>}/>
+          <Route path='/reset-password' element={<ResetPassword/>}/>
       </Routes>
    </Router>
   )

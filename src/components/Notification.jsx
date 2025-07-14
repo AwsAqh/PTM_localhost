@@ -9,7 +9,7 @@ const Notification = ({ message, type, onClose, actions }) => {
     }
   }, [type, onClose]);
 
-  console.log('Notification props:', { message, type, actions }); // Debug log
+  
   return (
     <div className={`notification ${type}`}>
       <div className={`notification-content ${type}`}>

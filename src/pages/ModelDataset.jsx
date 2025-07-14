@@ -31,7 +31,7 @@ const ModelDataset = () => {
         const data = await res.json();
         setDataset(data.dataset);
         setModelName(data.modelName);
-        console.log(data)
+    
       } catch (err) {
         setDataset([]);
       }

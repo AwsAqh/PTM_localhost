@@ -5,7 +5,7 @@ import "../styles/BrowsePreTrainedModels.css"
 import PreTrainedModelBlock from '../components/pre-trained-model-block'
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
-
+import Notification from '../components/Notification'
 
 const BrowsePreTrainedModels = () => {
   const apiUrl = import.meta.env.VITE_API_BACKEND_URL
@@ -17,11 +17,11 @@ const BrowsePreTrainedModels = () => {
   const [userName, setUserName] = useState('')
   const [error, setError] = useState(null)
   const {id} = useParams()
-  console.log("id : ",id)
+ 
   useEffect(() => { 
     if(!id) navigate("/browse")
   }, [id, navigate])
-
+  const [notification,setNotification]=useState({show:false,message:'',type:'',actions:[]})
   const categories = [
     { value: 'all', label: 'All Categories' },
     { value: 'plants', label: 'Plants' },
@@ -37,13 +37,13 @@ const BrowsePreTrainedModels = () => {
       const decodedToken = jwt_decode(token)
       const now = Date.now()/1000
       if(decodedToken.exp < now) {
-        console.log("token expired ! ")
+       
         localStorage.removeItem('token')
         navigate('/login')
       }
 
     } catch(err) {
-      console.log("failed to decode token ",err)
+     
       localStorage.removeItem('token')
       navigate('/login')
     }
@@ -59,10 +59,10 @@ const BrowsePreTrainedModels = () => {
         })
         const data = await response.json()
       
-        console.log("data : ",data)
+  
         if(!response.ok) {
-          console.log("error retrieving data ")
-          setError(data.error)
+    
+          setNotification({message:data.msg,type:"error",show:false})
         }
         
         setModels(data.models || [])
@@ -76,8 +76,8 @@ const BrowsePreTrainedModels = () => {
         })
         const data = await response.json()
         if(!response.ok) {
-          console.log("error retrieving data ")
-          setError(data.error)
+       
+          setNotification({message:data.msg,type:"error",show:false})
         }
         
         setModels(data || [])
@@ -85,8 +85,8 @@ const BrowsePreTrainedModels = () => {
       }
     
     } catch (err) {
-        console.log("can't fetch models!")
-        setError(err.error)
+      
+      setNotification({message:"something went wrong!",show:true,type:'error'})
       }
     }
     handleOnMount()
@@ -107,6 +107,8 @@ const BrowsePreTrainedModels = () => {
   return (
     <div className='models-page-container'>
       <Header/>
+      {notification.show&&<Notification message={notification.message} type={notification.type} actions={notification.actions} onClose={()=>setNotification({...notification,show:false})}  />}    
+
       <div className='search-container'>
         <div className='search-filters'>
           <div className='search-box'>
