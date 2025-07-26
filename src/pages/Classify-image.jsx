@@ -133,10 +133,10 @@ const ClassifyImage = () => {
       if(data.isOther){
         setIsOther(true)
         setClasses(prev => {
-          if (prev.some(c => c.name === "Other / uncertain")) {
+          if (prev.some(c => c === "Other / uncertain")) {
             return prev;
           }
-          return [...prev, { name: "Other / uncertain" }];
+          return [...prev,  "Other / uncertain" ];
         });
       }
       setClassificationResult(result)
@@ -168,7 +168,7 @@ const ClassifyImage = () => {
         />
       )}
       <div className="classify-page-content">
-        <AuthorInfo createdBy={createdBy.id} authorEmail={createdBy.email} authorName={createdBy.name} modelId={id} />
+        <AuthorInfo  createdBy={createdBy.id} authorEmail={createdBy.email} authorName={createdBy.name} modelId={id} modelName={modelName} />
 
       <div className='classify-content'>
         <div className='model-information'>
@@ -233,7 +233,7 @@ const ClassifyImage = () => {
                   onChange={handleImageSelect}
                   style={{display: "none"}}
                   id="input-image"
-                  accept="image/*"
+                  accept="image/png image/jpeg image/jpg"
                 />
                 <label className='upload-label' htmlFor='input-image'>
                   Upload Image

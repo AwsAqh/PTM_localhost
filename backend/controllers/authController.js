@@ -17,7 +17,7 @@ const transporter = nodemailer.createTransport({
   });
 
 exports.register=async(req,res)=>{
-    console.log("inside register")
+    
     const {name,email,password}=req.body
 
     // Input validation
@@ -175,7 +175,7 @@ try{
     if(!user) return res.status(404).json({message:"user not found"})
 
         if(user.resetPasswordPin!==pin || user.resetPasswordExpires<Date.now()){
-           return res.status(400).json({msg:"Invalid pin , or pin expired"})
+           return res.status(400).json({message:"Invalid pin , or pin expired"})
         }
         console.log("correct pin")
        return res.status(200).json({ message:"correct pin"})

@@ -126,8 +126,9 @@ const ResetPassword = (route) => {
     
             const response=await fetch("http://localhost:5050/api/auth/confirm-pin",{method:"POST",headers:{"Content-Type":"application/json"}, body:JSON.stringify({email:state.email,pin})})
             const data=await response.json()
-          
+            console.log(data)
             if(!response.ok){
+               
                 setNotification({message:data.message,show:true,type:'error'})
 
             } 

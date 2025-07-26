@@ -55,6 +55,8 @@ const limit = pLimit(19);
   let uploadPromises = [];
   let firstClassFirstImage = null;
   let firstClassFound = false;
+  let skippedFiles = [];
+  let successfulUploads = [];
 
   for (let i = 0; i < classesCount; i++) {
     console.log(req.body[`class_name_${i}`])
@@ -75,8 +77,23 @@ const limit = pLimit(19);
                 firstClassFirstImage = result.secure_url;
                 firstClassFound = true;
               }
+              successfulUploads.push({
+                className,
+                fileName: file.originalname,
+                url: result.secure_url
+              });
               return result;
-            }))
+            })
+            .catch(err => {
+              console.warn(`Skipping invalid image: ${file.originalname} (${err.message})`);
+              skippedFiles.push({
+                className,
+                fileName: file.originalname,
+                error: err.message
+              });
+              return null;
+            })
+        );
         uploadPromises.push(job);
       });
     } else {
@@ -85,9 +102,10 @@ const limit = pLimit(19);
   }
 
   try {
-    // Wait for all uploads to finish
-    await Promise.all(uploadPromises);
+    // Wait for all uploads to finish (success or fail)
+    await Promise.allSettled(uploadPromises);
 
+    // Optionally, you can filter out classes with no valid images here
     // Now proceed with training
     console.log("Trying to train with model name:", modelNameWithUniqueId);
     const response = await axios.post(`${python_api_url}/train`, {
@@ -131,7 +149,8 @@ const limit = pLimit(19);
         modelPath: modelPath,
         cloudPath: cloudPath,
         modelId: savedModel._id,
-        featureImage: firstClassFirstImage
+        featureImage: firstClassFirstImage,
+        skippedFiles // Optionally report skipped files
       });
     } catch (error) {
       console.log("Error saving model document:", error);

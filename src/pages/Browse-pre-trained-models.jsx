@@ -25,7 +25,7 @@ const BrowsePreTrainedModels = () => {
   const categories = [
     { value: 'all', label: 'All Categories' },
     { value: 'plants', label: 'Plants' },
-    { value: 'animals_diseases', label: 'Animals & Diseases' },
+    { value: 'animals diseases', label: 'Animals  Diseases' },
     { value: 'entertainment', label: 'Entertainment' },
     { value: 'other', label: 'Other' }
   ];

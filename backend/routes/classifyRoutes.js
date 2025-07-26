@@ -5,6 +5,7 @@ const router = express.Router();
 
 
 router.post('/train', upload.any(), (req, res, next) => {
+    req.setTimeout(1000*60*60)
     console.log("Verifying token...");
 
     let token;

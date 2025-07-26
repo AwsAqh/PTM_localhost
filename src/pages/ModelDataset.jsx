@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams,useLocation } from 'react-router-dom';
 import Header from '../components/header';
 import '../styles/model-dataset.css'; // or your main style
 
@@ -11,8 +11,9 @@ const ModelDataset = () => {
   const [openFolders, setOpenFolders] = useState({});
   const [modalImage, setModalImage] = useState(null);
   const [modelName, setModelName] = useState('');
+  const [error,setError]=useState(false)
 
-  //fetgch dataset on mount
+  const {state}=useLocation()
   useEffect(() => {
     const fetchDataset = async () => {
       setLoading(true);
@@ -27,11 +28,13 @@ const ModelDataset = () => {
             }
           }
         );
-     
+        
         const data = await res.json();
+        if(res.ok){
         setDataset(data.dataset);
         setModelName(data.modelName);
-    
+        } 
+        else setError(true)
       } catch (err) {
         setDataset([]);
       }
@@ -59,9 +62,11 @@ const ModelDataset = () => {
     <div className="models-page-container">
       <Header />
       <div className="page-content">
-        <h2 style={{textAlign:'center',color:'#fff'}}>Dataset for Model: {modelName}</h2>
-        {loading ? (
-          <div>Loading dataset...</div>
+        <h2 style={{textAlign:'center',color:'#fff'}}>Dataset for Model: {state.modelName}</h2>
+        { error ? <div style={{color:"white", fontSize:"bold"}}> error retreiving dataset !</div>
+        :
+        loading ? (
+          <div style={{color:"white", fontSize:"bold"}}>Loading dataset...</div>
         ) : (
           <div className="dataset-folder-list">
             {dataset.map(cls => (

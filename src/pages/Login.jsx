@@ -99,7 +99,7 @@ navigate('/reset-password',{state:{email:formEmail.current?.value}})
                             <div style={{display:"flex",flexDirection:'column', gap:"10px"}}>
                             <button type="submit" className='login-btn' >{loading ? "Loading..." : "Login"}</button>
 
-                            <button type='submit' className='outlined-btn' onClick={handleForgotClick}  >Forgot password</button>
+                            <button type='button' className='outlined-btn' onClick={handleForgotClick}  >Forgot password</button>
                             </div>
 
                             <div style={{fontSize:"12px", paddingTop:"5px"}}> Don't have an account? <a href='/register'>Register</a> </div>
